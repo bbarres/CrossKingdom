@@ -9,18 +9,27 @@
 ##############################################################################/
 
 library(drc)
-library(ape)
+library(plotrix)
+library(gdata)
+library(ggplot2)
+library(dplyr)
 
 
 ##############################################################################/
 #Loading and preparing the main data set####
 ##############################################################################/
 
-#data by individuals, including all individuals (hd, families, parents and CC)
-RTdata<-read.table("data/datatot.txt",sep="\t",stringsAsFactors=FALSE,
-                   header=TRUE)
-#because some functions do not like "." within colnames, we replace them
-colnames(RTdata)<-str_replace_all(colnames(RTdata),"[.]","_")
+#load the dose response dataset
+dataReg<-read.table("data/ExtractionR_MyzusSpiro_2401160001_20241025.txt",
+                    header=TRUE,stringsAsFactors=TRUE,sep=";")
+
+#aggregating the number of individuals per rep and dose
+dataRegRep<-as.data.frame(aggregate(cbind(nb_vi,nb_mtot)~dose + dat_test,
+                                    data=dataReg,"sum"))
+
+#aggregating the number of individuals per dose
+dataRegDos<-as.data.frame(aggregate(cbind(nb_vi,nb_mtot)~dose,
+                                    data=dataReg,"sum"))
 
 
 ##############################################################################/
