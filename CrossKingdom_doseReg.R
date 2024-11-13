@@ -19,52 +19,56 @@ source("CrossKingdom_load.R")
 #Writing session information for reproducibility####
 ##############################################################################/
 
-
-
 #dose response analyses by date
-temp.m1<-drm(nb_mtot/(nb_mtot+nb_vi)~dose,
+Clo116.m1<-drm(nb_mtot/(nb_mtot+nb_vi)~dose,
              curveid=dat_test,
              weights=(nb_mtot+nb_vi),
-             data=dataReg,
+             data=dataReg116,
              fct=LN.3u(),type="binomial")
 #plot de la courbe dose-réponse
-plot(temp.m1,ylim=c(0,1.1),xlim=c(0,100),
-     main="Courbe dose réponse du clone 24-0116-0001 \nau spriotétramate par date \n(72h après retrait des femelles)",
-     ylab="mortality rate",col = T)
+plot(Clo116.m1,ylim=c(0,1.1),xlim=c(0,100),
+     main="Clone 24-0116-0001 spirotetramat by date 
+     (72h after removing female)",
+     ylab="mortality rate",col=TRUE,
+     )
 #comparaison des courbes entre dates
-compParm(temp.m1,"e")
+compParm(Clo116.m1,"e")
 #comparaison DL50 entre dates
-EDcomp(temp.m1,c(50,50))
+EDcomp(Clo116.m1,c(50,50))
 #DL 50 pour chaque date
-ED50m1<-ED(temp.m1,0.50,type="absolute")
+ED50m1<-ED(Clo116.m1,0.50,type="absolute")
 
 
 # Création de la courbe dose réponse avec
 # le data où les vivants et les morts sont agrégés par date et dose
-temp.m2<-drm(nb_mtot/(nb_mtot+nb_vi)~dose,
+Clo116.m2<-drm(nb_mtot/(nb_mtot+nb_vi)~dose,
              weights=(nb_mtot+nb_vi),
              data=dataRegRep,
              fct=LN.3u(),type="binomial")
 #DL50 de la courbe dose réponse avec cumul de dates
-ED50v<-ED(temp.m2,0.50,type="absolute")
+ED50v<-ED(Clo116.m2,0.50,type="absolute")
 
 #plot de la courbe "moyenne" avec intervalles de confiance
-plot(temp.m2,ylim=c(0,1.1),xlim=c(0,100),
+plot(Clo116.m2,ylim=c(0,1.1),xlim=c(0,100),
      main="Courbe moyenne dose-réponse du clone 24-0116-0001 \nau spirotétramate",
      type="confidence",ylab="mortality rate",
      las=1)
 
 # plot des taux de mortalité par dose et par date
-plot(temp.m2,ylim=c(0,1.1),xlim=c(0,100),
-     main=names(table(dataReg$ech_id))[1],
+plot(Clo116.m2,ylim=c(0,1.1),xlim=c(0,100),
+     main=names(table(dataReg116$ech_id))[1],
      type="all",add=TRUE)
 
 # plot des taux de mortalité par dose
-points((nb_mtot/(nb_mtot+nb_vi))~dose,data=dataRegDos,
+points((nb_mtot/(nb_mtot+nb_vi))~dose,data=dataRegDos116,
        col="red",pch=19)
 
 #plot de la valeur de la DL50
 text(x=20,y=0.3,labels=paste("ED50=",round(ED50v[1],digits=4)))
+
+
+
+
 
 
 #Idem pour le clone de référence du projet : 17-0153-0020
