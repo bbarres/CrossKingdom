@@ -1,6 +1,6 @@
 ##############################################################################/
 ##############################################################################/
-#Loading the data sets and packages needed for CrossKingdom analyses
+#Regression of dose response experiment
 ##############################################################################/
 ##############################################################################/
 
@@ -98,14 +98,17 @@ text(x=20,y=0.3,labels=paste("ED50=",round(ED50v[1],digits=4)))
 
 
 
-# Comparer sur un même graphique les données du clone de référence et du clone porteur de la mutation A2226V
+##############################################################################/
+#Comparison between sensitive and resistant clone####
+##############################################################################/
 
 #Création d'un jeu de données avec l'ensemble des données des deux clones  
-data_tot <- rbind(dataReg,dataReg1)
+data_tot<-rbind(dataReg116,dataReg153)
 
-dataRegRepTot<-as.data.frame(aggregate(cbind(nb_vi,nb_mtot)~dose + dat_test + ech_id,
-                                       data=data_tot,"sum"))
-dataRegRepTot$date_puceron <- paste0(dataRegRepTot$ech_id,"_",dataRegRepTot$dat_test)
+dataRegRepTot<-as.data.frame(aggregate(cbind(nb_vi,nb_mtot)~dose+
+                                         dat_test+ech_id,data=data_tot,"sum"))
+dataRegRepTot$date_puceron<-paste0(dataRegRepTot$ech_id,"_",
+                                     dataRegRepTot$dat_test)
 temp.x<-drm(nb_mtot/(nb_mtot+nb_vi)~dose,
             weights=(nb_mtot+nb_vi),
             data=dataRegRepTot,
@@ -113,7 +116,7 @@ temp.x<-drm(nb_mtot/(nb_mtot+nb_vi)~dose,
             fct=LN.3u(),type="binomial")
 
 #plot de la courbe dose-réponse
-plot(temp.m1, col = "red",
+plot(temp.x, col = "red",
      main="Courbe dose réponse des clones\nau spirotétramate pour chaque date",
      ylab="mortality rate",legendPos=c(10,0.45))
 plot(temp.m3, add = TRUE, col = "darkolivegreen2")
