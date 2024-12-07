@@ -50,7 +50,7 @@ plot(Clo116.m2,ylim=c(0,1.1),xlim=c(0,200),
 points((nb_mtot/(nb_mtot+nb_vi))~dose,data=dataRegDos116,
        col="red",pch=19)
 #adding the LD50 value
-text(x=20,y=0.3,labels=paste("ED50=",round(ED50_116[1],digits=4)))
+text(x=20,y=0.3,labels=paste("ED50=",round(ED50_116[1],digits=3)))
 
 
 ##############################################################################/
@@ -94,30 +94,33 @@ plot(Clo153.m2,ylim=c(0,1.1),xlim=c(0,100),
 points((nb_mtot/(nb_mtot+nb_vi))~dose,data=dataRegDos153,
        col="red",pch=19)
 #adding the LD50 value
-text(x=20,y=0.3,labels=paste("ED50=",round(ED50v[1],digits=4)))
-
+text(x=20,y=0.3,labels=paste("ED50=",round(ED50v[1],digits=3)))
 
 
 ##############################################################################/
 #Comparison between sensitive and resistant clone####
 ##############################################################################/
 
-#Création d'un jeu de données avec l'ensemble des données des deux clones  
-data_tot<-rbind(dataReg116,dataReg153)
+#combining the dataset 
+data_rep<-rbind(cbind(dataRegRep116,clone="17-0116"),
+                cbind(dataRegRep153,clone="17-0153"))
 
 dataRegRepTot<-as.data.frame(aggregate(cbind(nb_vi,nb_mtot)~dose+
                                          dat_test+ech_id,data=data_tot,"sum"))
 dataRegRepTot$date_puceron<-paste0(dataRegRepTot$ech_id,"_",
                                      dataRegRepTot$dat_test)
-temp.x<-drm(nb_mtot/(nb_mtot+nb_vi)~dose,
-            weights=(nb_mtot+nb_vi),
-            data=dataRegRepTot,
-            curveid=date_puceron,
-            fct=LN.3u(),type="binomial")
+
+Compclo<-drm(nb_mtot/(nb_mtot+nb_vi)~dose,
+             curveid=dat_test,
+             weights=(nb_mtot+nb_vi),
+             data=data_rep,
+             fct=LN.3u(),type="binomial")
+
 
 #plot de la courbe dose-réponse
 plot(temp.x, col = "red",
-     main="Courbe dose réponse des clones\nau spirotétramate pour chaque date",
+     main="Dose response curves to spirotetramat
+     for both clones",
      ylab="mortality rate",legendPos=c(10,0.45))
 plot(temp.m3, add = TRUE, col = "darkolivegreen2")
 
