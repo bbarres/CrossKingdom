@@ -9,7 +9,7 @@ source("CrossKingdom_load.R")
 
 
 ##############################################################################/
-#Dose response analyses of clone 24-0116-0001####
+#Basic tests to compare DD####
 ##############################################################################/
 
 #dose response analyses by replicate

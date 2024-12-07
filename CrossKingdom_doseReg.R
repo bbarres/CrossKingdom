@@ -105,24 +105,16 @@ text(x=20,y=0.3,labels=paste("ED50=",round(ED50v[1],digits=3)))
 data_rep<-rbind(cbind(dataRegRep116,clone="17-0116"),
                 cbind(dataRegRep153,clone="17-0153"))
 
-dataRegRepTot<-as.data.frame(aggregate(cbind(nb_vi,nb_mtot)~dose+
-                                         dat_test+ech_id,data=data_tot,"sum"))
-dataRegRepTot$date_puceron<-paste0(dataRegRepTot$ech_id,"_",
-                                     dataRegRepTot$dat_test)
-
 Compclo<-drm(nb_mtot/(nb_mtot+nb_vi)~dose,
-             curveid=dat_test,
+             curveid=clone,
              weights=(nb_mtot+nb_vi),
              data=data_rep,
              fct=LN.3u(),type="binomial")
 
-
-#plot de la courbe dose-réponse
-plot(temp.x, col = "red",
-     main="Dose response curves to spirotetramat
-     for both clones",
-     ylab="mortality rate",legendPos=c(10,0.45))
-plot(temp.m3, add = TRUE, col = "darkolivegreen2")
+#plotting the dose-response
+plot(Compclo,main="Dose response curves 
+to spirotetramat for both clones",
+     ylab="mortality rate",legendPos=c(0.05,0.8))
 
 
 ##############################################################################/
