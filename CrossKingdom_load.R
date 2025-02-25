@@ -39,6 +39,10 @@ dataRegRep153<-as.data.frame(aggregate(cbind(nb_vi,nb_mtot)~dose + dat_test,
 dataRegDos153<-as.data.frame(aggregate(cbind(nb_vi,nb_mtot)~dose,
                                        data=dataReg153,"sum"))
 
+#data herbicides on Myzus clones
+myzusHerbi<-read.table("data/data_Myzus_herbicides_20250225.txt",
+                       header=TRUE,stringsAsFactors=TRUE,sep="\t")
+
 
 ##############################################################################/
 #Writing session information for reproducibility####
