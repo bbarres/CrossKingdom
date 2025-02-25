@@ -112,8 +112,8 @@ Compclo<-drm(nb_mtot/(nb_mtot+nb_vi)~dose,
              fct=LN.3u(),type="binomial")
 
 #plotting the dose-response
-plot(Compclo,main="Dose response curves 
-to spirotetramat for both clones",
+plot(Compclo,main="spirotetramat dose response curves 
+for both clones",
      ylab="mortality rate",legendPos=c(0.05,0.8))
 
 
