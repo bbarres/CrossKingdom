@@ -1,6 +1,6 @@
 ##############################################################################/
 ##############################################################################/
-#Comparison of the DD results of weeds experiments
+#CAA : Test of the effect of several herbicides on insect
 ##############################################################################/
 ##############################################################################/
 
@@ -9,11 +9,13 @@ source("CrossKingdom_load.R")
 
 
 ##############################################################################/
-#Basic tests to compare DD####
+#Effect on fertility####
 ##############################################################################/
 
-#dose response analyses by replicate
+#first we compare the repetitions
 
+#dose response analyses by replicate
+aggregate(cbind(Vivants,Morts_H72,Total)~Clone+SA+Dose,data=MyzHerbi,"sum")
 
 
 
