@@ -42,6 +42,10 @@ dataRegDos153<-as.data.frame(aggregate(cbind(nb_vi,nb_mtot)~dose,
 #data herbicides on Myzus clones
 MyzHerbi<-read.table("data/data_Myzus_herbicides_20250225.txt",
                      header=TRUE,stringsAsFactors=TRUE,sep="\t")
+#reorder factors
+MyzHerbi$Dose<-factor(MyzHerbi$Dose,levels=c("NT","N/2","N","2N"))
+#computing and adding the total number of dead
+MyzHerbi<-cbind(MyzHerbi,"TotMort"=rowSums(MyzHerbi[,c(7:10)]))
 
 
 ##############################################################################/
