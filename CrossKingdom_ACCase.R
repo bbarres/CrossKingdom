@@ -31,7 +31,7 @@ temp<-drop.levels(temp)
 temp$Dose<-factor(temp$Dose,levels=c("NT","N","2N"))
 mod_nblarv<-aov(Total~SA*Dose*Clone+Error(Repetition/Dose/Clone),data=temp)
 summary(mod_nblarv)
-interaction.plot(temp$Dose,temp$SA,temp$Total)
+interaction.plot(temp$Dose,temp$SA,temp$Total,las=1)
 
 
 ##############################################################################/
