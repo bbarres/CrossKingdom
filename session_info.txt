@@ -8,10 +8,10 @@
  collate  French_France.utf8
  ctype    French_France.utf8
  tz       Europe/Paris
- date     2025-02-27
+ date     2025-02-28
  rstudio  2024.12.1+563 Kousa Dogwood (desktop)
  pandoc   NA
- quarto   ERROR: Unknown command "TMPDIR=C:/Users/benoi/AppData/Local/Temp/RtmpCQyIv4/file46e8473d7443". Did you mean command "uninstall"? @ C:\\PROGRA~1\\RStudio\\RESOUR~1\\app\\bin\\quarto\\bin\\quarto.exe
+ quarto   ERROR: Unknown command "TMPDIR=C:/Users/benoi/AppData/Local/Temp/Rtmpg1MDdV/file1a9c29773519". Did you mean command "uninstall"? @ C:\\PROGRA~1\\RStudio\\RESOUR~1\\app\\bin\\quarto\\bin\\quarto.exe
 
 ─ Packages ───────────────────────────────────────────────────────────────────────
  package     * version date (UTC) lib source
@@ -38,6 +38,7 @@
  multcomp      1.4-28  2025-01-29 [1] CRAN (R 4.4.2)
  munsell       0.5.1   2024-04-01 [1] CRAN (R 4.4.1)
  mvtnorm       1.3-3   2025-01-10 [1] CRAN (R 4.4.2)
+ nlme        * 3.1-166 2024-08-14 [2] CRAN (R 4.4.2)
  pillar        1.10.1  2025-01-07 [1] CRAN (R 4.4.2)
  pkgconfig     2.0.3   2019-09-22 [1] CRAN (R 4.4.1)
  plotrix     * 3.8-4   2023-11-10 [1] CRAN (R 4.4.0)

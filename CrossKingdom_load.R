@@ -13,6 +13,7 @@ library(plotrix)
 library(gdata)
 library(ggplot2)
 library(dplyr)
+library(nlme)
 
 
 ##############################################################################/
@@ -40,12 +41,15 @@ dataRegDos153<-as.data.frame(aggregate(cbind(nb_vi,nb_mtot)~dose,
                                        data=dataReg153,"sum"))
 
 #data herbicides on Myzus clones
-MyzHerbi<-read.table("data/data_Myzus_herbicides_20250225.txt",
+MyzHerbi<-read.table("data/data_Myzus_herbicides_20250228.txt",
                      header=TRUE,stringsAsFactors=TRUE,sep="\t")
 #reorder factors
 MyzHerbi$Dose<-factor(MyzHerbi$Dose,levels=c("NT","N/2","N","2N"))
-#computing and adding the total number of dead
-MyzHerbi<-cbind(MyzHerbi,"TotMort"=rowSums(MyzHerbi[,c(7:10)]))
+#reorder the Active substances
+MyzHerbi$Active_substance<-factor(MyzHerbi$Active_substance,
+                                  levels=c("Clethodim","Cycloxydim",
+                                           "Pinoxaden","Clodinafop",
+                                           "Fluazifop","Quizalofop"))
 
 
 ##############################################################################/
