@@ -1,6 +1,6 @@
 ##############################################################################/
 ##############################################################################/
-#ACCase : Test of the effect of several herbicides on insect
+#ACCase : Test of the effect of several herbicides on an aphid species
 ##############################################################################/
 ##############################################################################/
 
@@ -11,20 +11,6 @@ source("CrossKingdom_load.R")
 ##############################################################################/
 #Effect on fertility####
 ##############################################################################/
-
-#first we compare the repetitions
-
-#dose response analyses by replicate
-aggregate(cbind(Live,Total_death,Total)~Clone+Active_substance+
-            Dose,data=MyzHerbi,"sum")
-
-
-glm(c(V,M)~SA*Clone,binomial)
-glm(c(Pond,PasPond)~SA*Clone,binomial)
-
-
-
-
 
 #analysis of the effect of SA on the mean number of larvae
 temp<-MyzHerbi[MyzHerbi$Dose!="N/2",]
@@ -37,11 +23,21 @@ mod_nblarv<-aov(Total~(Active_substance+Dose+Clone)^2
 summary(mod_nblarv)
 #same kind of analysis but in a glmm framework
 mmod_nblarv<-lme(Total~Active_substance*Dose*Clone,
-                 random= ~1|Repetition/Dose/Clone,data=temp)
+                 random= ~1|Repetition/Dose/Clone,
+                 data=temp,method="ML")
 summary(mmod_nblarv)
-mmod_nblarv<-lme(Total~(Active_substance+Dose+Clone)^2,
-                 random= ~1|Repetition/Dose/Clone,data=temp)
-summary(mmod_nblarv)
+mmod_nblarv.1<-update(mmod_nblarv,~. -Active_substance:Dose:Clone)
+summary(mmod_nblarv.1)
+anova(mmod_nblarv.1,mmod_nblarv)
+mmod_nblarv.2<-update(mmod_nblarv.1,~. -Active_substance:Clone)
+anova(mmod_nblarv.2,mmod_nblarv.1)
+#the interaction Active_substance:Clone can be removed
+mmod_nblarv.3<-update(mmod_nblarv.2,~. -Dose:Clone)
+anova(mmod_nblarv.3,mmod_nblarv.2)
+mmod_nblarv.4<-update(mmod_nblarv.2,~. -Active_substance:Dose)
+anova(mmod_nblarv.4,mmod_nblarv.2)
+summary(mmod_nblarv.2)
+plot(mmod_nblarv.2)
 
 #figures for the effect of AS on the mean number of larvae
 interaction.plot(temp$Dose,temp$Active_substance,temp$Total,las=1)
@@ -113,6 +109,58 @@ boxplot(Total/Laying_females~Dose+Active_substance,data=temp,las=1,
 text(c((0:5)*3+(1:6)*2),y=5.8,
      labels=levels(temp$Active_substance),cex=1.5,
      col=c(3,3,3,4,4,4))
+
+
+
+##############################################################################/
+#Effect of the herbicides AS on survival####
+##############################################################################/
+
+#dose response analyses by replicate
+aggregate(cbind(Live,Total_death,Total)~Clone+Active_substance+
+            Dose,data=MyzHerbi,"sum")
+
+
+MortModl<-glm(cbind(Live,Total_death)~Active_substance*Dose*Clone,
+              binomial,data=MyzHerbi)
+summary(MortModl)
+
+
+#figures for the effect of SA on the death rate of clones
+interaction.plot(temp$Dose,temp$Active_substance,
+                 temp$Total/temp$Laying_females,las=1)
+boxplot(Total_death/Total~Clone+Dose+Active_substance,
+        data=temp,las=1,
+        at=c(((1+6*0):(6*1))+2*0,
+             ((1+6*1):(6*2))+2*1,
+             ((1+6*2):(6*3))+2*2,
+             ((1+6*3):(6*4))+2*3,
+             ((1+6*4):(6*5))+2*4,
+             ((1+6*5):(6*6))+2*5),
+        col=rep(c(1,2),times=18),
+        border=rep(c(3,4),each=18),
+        names=rep(c("NT","NT","N","N","2N","2N"),times=6))
+text(c((0:5)*6+(1:6)*2+1.5),y=1.02,
+     labels=levels(temp$Active_substance),cex=1.5,
+     col=c(3,3,3,4,4,4))
+#figures for the effect of SA on the number of death for clone (in order
+#to remove the illusion of high death rate computed on a very low number 
+#of individuals)
+boxplot(Total_death~Clone+Dose+Active_substance,
+        data=temp,las=1,
+        at=c(((1+6*0):(6*1))+2*0,
+             ((1+6*1):(6*2))+2*1,
+             ((1+6*2):(6*3))+2*2,
+             ((1+6*3):(6*4))+2*3,
+             ((1+6*4):(6*5))+2*4,
+             ((1+6*5):(6*6))+2*5),
+        col=rep(c(1,2),times=18),
+        border=rep(c(3,4),each=18),
+        names=rep(c("NT","NT","N","N","2N","2N"),times=6))
+text(c((0:5)*6+(1:6)*2+1.5),y=65,
+     labels=levels(temp$Active_substance),cex=1.5,
+     col=c(3,3,3,4,4,4))
+
 
 
 
