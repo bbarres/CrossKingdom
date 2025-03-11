@@ -122,8 +122,9 @@ aggregate(cbind(Live,Total_death,Total)~Clone+Active_substance+
 
 
 MortModl<-glm(cbind(Live,Total_death)~Active_substance*Dose*Clone,
-              binomial,data=MyzHerbi)
+              binomial,data=temp)
 summary(MortModl)
+anova(MortModl)
 
 
 #figures for the effect of SA on the death rate of clones
