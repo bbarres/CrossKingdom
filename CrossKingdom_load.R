@@ -17,6 +17,7 @@ library(nlme)
 library(multcomp)
 library(lme4)
 library(lsmeans)
+library(emmeans)
 
 
 ##############################################################################/
