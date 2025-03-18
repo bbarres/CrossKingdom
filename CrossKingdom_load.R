@@ -14,6 +14,9 @@ library(gdata)
 library(ggplot2)
 library(dplyr)
 library(nlme)
+library(multcomp)
+library(lme4)
+library(lsmeans)
 
 
 ##############################################################################/

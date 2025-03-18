@@ -21,6 +21,13 @@ summary(mod_nblarv)
 mod_nblarv<-aov(Total~(Active_substance+Dose+Clone)^2
                 +Error(Repetition/Dose/Clone),data=temp)
 summary(mod_nblarv)
+TukeyHSD(mod_nblarv) #doesn't work with an Error term in the aov
+
+emm<-emmeans(mod_nblarv,~(Active_substance+Dose+Clone)^2)
+#alternatively, you can use mixed model and glht function from the multcomp package
+#other possibilité afex package function mixed + lsmeans package
+
+
 #same kind of analysis but in a glmm framework
 mmod_nblarv<-lme(Total~Active_substance*Dose*Clone,
                  random= ~1|Repetition/Dose/Clone,
