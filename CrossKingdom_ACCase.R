@@ -24,8 +24,9 @@ summary(mod_nblarv)
 TukeyHSD(mod_nblarv) #doesn't work with an Error term in the aov
 
 emm<-emmeans(mod_nblarv,~(Active_substance+Dose+Clone)^2)
-#alternatively, you can use mixed model and glht function from the multcomp package
-#other possibilité afex package function mixed + lsmeans package
+#alternatively, you can use mixed model and glht function from the 
+#multcomp package other possibilité afex package function mixed + 
+#lsmeans package
 
 
 #same kind of analysis but in a glmm framework
@@ -61,7 +62,8 @@ boxplot(Total~Clone+Dose+Active_substance,data=temp,las=1,
 text(c((0:5)*6+(1:6)*2+1.5),y=99,
      labels=levels(temp$Active_substance),cex=1.5,
      col=c(3,3,3,4,4,4))
-#since there is no significant effect of the clone, they can be pooled together
+#since there is no significant effect of the clone, they can be pooled 
+#together
 boxplot(Total~Dose+Active_substance,data=temp,las=1,
         at=c(((1+3*0):(3*1))+2*0,
              ((1+3*1):(3*2))+2*1,
@@ -103,7 +105,8 @@ boxplot(Total/Laying_females~Clone+Dose+Active_substance,
 text(c((0:5)*6+(1:6)*2+1.5),y=5.8,
      labels=levels(temp$Active_substance),cex=1.5,
      col=c(3,3,3,4,4,4))
-#since there is no significant effect of the clone, they can be pooled together
+#since there is no significant effect of the clone, they can be pooled 
+#together
 boxplot(Total/Laying_females~Dose+Active_substance,data=temp,las=1,
         at=c(((1+3*0):(3*1))+2*0,
              ((1+3*1):(3*2))+2*1,
