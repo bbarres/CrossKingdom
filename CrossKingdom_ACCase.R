@@ -24,6 +24,9 @@ summary(mod_nblarv)
 TukeyHSD(mod_nblarv) #doesn't work with an Error term in the aov
 
 emm<-emmeans(mod_nblarv,~(Active_substance+Dose+Clone)^2)
+plot(emm)
+emm<-emmeans(mod_nblarv,~(Clone+Dose+Active_substance)^2)
+plot(emm)
 #alternatively, you can use mixed model and glht function from the 
 #multcomp package other possibilité afex package function mixed + 
 #lsmeans package
@@ -44,8 +47,24 @@ mmod_nblarv.3<-update(mmod_nblarv.2,~. -Dose:Clone)
 anova(mmod_nblarv.3,mmod_nblarv.2)
 mmod_nblarv.4<-update(mmod_nblarv.2,~. -Active_substance:Dose)
 anova(mmod_nblarv.4,mmod_nblarv.2)
+
+#here is the "minimal" model
 summary(mmod_nblarv.2)
+#checking the residuals
 plot(mmod_nblarv.2)
+#response variable vs the fitted value
+plot(mmod_nblarv.2,Total~fitted(.))
+#normal distribution of errors in the different repetition
+qqnorm(mmod_nblarv.2,~resid(.)|Repetition)
+
+#same model but using lmer
+r<-temp$Repetition
+rd<-temp$Repetition:temp$Dose
+rdc<-temp$Repetition:temp$Dose:temp$Clone
+mmod_nblarv.2bis<-lmer(Total~Active_substance+Dose+Clone+
+                         Active_substance:Dose+Dose:Clone+(1|r)+(1|rd),
+                       data=temp,REML=FALSE)
+print(mmod_nblarv.2bis,cor=FALSE)
 
 #figures for the effect of AS on the mean number of larvae
 interaction.plot(temp$Dose,temp$Active_substance,temp$Total,las=1)
