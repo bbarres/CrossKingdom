@@ -56,6 +56,14 @@ plot(mmod_nblarv.2)
 plot(mmod_nblarv.2,Total~fitted(.))
 #normal distribution of errors in the different repetition
 qqnorm(mmod_nblarv.2,~resid(.)|Repetition)
+Anova(mmod_nblarv.2,type=c("III"))
+#checking for overdispersion
+overdisp_fun = function(model) {
+  sum(residuals(model,type="pearson")^2)/df.residual(model)
+}
+
+overdisp_fun(mmod_nblarv.2)
+
 
 #same model but using lmer
 r<-temp$Repetition
@@ -65,6 +73,13 @@ mmod_nblarv.2bis<-lmer(Total~Active_substance+Dose+Clone+
                          Active_substance:Dose+Dose:Clone+(1|r)+(1|rd),
                        data=temp,REML=FALSE)
 print(mmod_nblarv.2bis,cor=FALSE)
+
+mmod_nblarv.2ter<-glmmTMB(Total~Active_substance+Dose+Clone+
+                            Active_substance:Dose+Dose:Clone+(1|r)+(1|rd),
+                          data=temp,REML=FALSE)
+summary(mmod_nblarv.2ter)
+overdisp_fun(mmod_nblarv.2ter)
+Anova(mmod_nblarv.2ter)
 
 #figures for the effect of AS on the mean number of larvae
 interaction.plot(temp$Dose,temp$Active_substance,temp$Total,las=1)
