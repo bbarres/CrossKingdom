@@ -9,7 +9,7 @@ source("CrossKingdom_load.R")
 
 
 ##############################################################################/
-#Effect on fertility####
+#Effect on fertility by lm####
 ##############################################################################/
 
 #analysis of the effect of SA on the mean number of larvae
@@ -31,6 +31,33 @@ plot(emm)
 #multcomp package other possibilité afex package function mixed + 
 #lsmeans package
 
+#using the afex package
+mod_afex<-aov_car(Total~(Active_substance+Dose+Clone+
+                           Active_substance:Dose+Dose:Clone+
+                           Error(Repetition/(Active_substance+Dose+Clone))),
+                  data=temp)
+mod_afex
+afex_plot(mod_afex,"Dose","Active_substance","Clone")
+
+emmAS<-emmeans(mod_afex,~Active_substance)
+pairs(emmAS)
+summary(as.glht(pairs(emmAS)),test=adjusted("BH"))
+emmDos<-emmeans(mod_afex,~Dose)
+pairs(emmDos)
+summary(as.glht(pairs(emmDos)),test=adjusted("BH"))
+emmClone<-emmeans(mod_afex,~Clone)
+pairs(emmClone)
+summary(as.glht(pairs(emmClone)),test=adjusted("BH"))
+
+#investigating the effect of Dose by active substance
+emmDoByAS<-emmeans(mod_afex,"Dose",by="Active_substance")
+emmDoByAS
+pairs(emmDoByAS)
+
+
+##############################################################################/
+#Effect on fertility using glmm####
+##############################################################################/
 
 #same kind of analysis but in a glmm framework
 mmod_nblarv<-lme(Total~Active_substance*Dose*Clone,
@@ -75,7 +102,8 @@ mmod_nblarv.2bis<-lmer(Total~Active_substance+Dose+Clone+
 print(mmod_nblarv.2bis,cor=FALSE)
 
 mmod_nblarv.2ter<-glmmTMB(Total~Active_substance+Dose+Clone+
-                            Active_substance:Dose+Dose:Clone+(1|r)+(1|rd),
+                            Active_substance:Dose+Dose:Clone+
+                            (1|r)+(1|rd)+(1|rdc),
                           data=temp,REML=FALSE)
 summary(mmod_nblarv.2ter)
 overdisp_fun(mmod_nblarv.2ter)
