@@ -89,7 +89,7 @@ overdisp_fun = function(model) {
   sum(residuals(model,type="pearson")^2)/df.residual(model)
 }
 
-overdisp_fun(mmod_nblarv.2)
+overdisp_fun(mmod_nblarv.2) #doesn't seem to work (df.residual=NULL)
 
 
 #same model but using lmer
@@ -101,6 +101,8 @@ mmod_nblarv.2bis<-lmer(Total~Active_substance+Dose+Clone+
                        data=temp,REML=FALSE)
 print(mmod_nblarv.2bis,cor=FALSE)
 
+#same analysis with package glmmTMB in order to have the overdisp function
+#working
 mmod_nblarv.2ter<-glmmTMB(Total~Active_substance+Dose+Clone+
                             Active_substance:Dose+Dose:Clone+
                             (1|r)+(1|rd)+(1|rdc),

@@ -8,10 +8,13 @@
 #Loading the libraries####
 ##############################################################################/
 
+library(afex)
+library(car)
 library(drc)
 library(plotrix)
 library(gdata)
 library(ggplot2)
+library(glmmTMB)
 library(dplyr)
 library(nlme)
 library(multcomp)
