@@ -41,12 +41,15 @@ afex_plot(mod_afex,"Dose","Active_substance","Clone")
 
 emmAS<-emmeans(mod_afex,~Active_substance)
 pairs(emmAS)
+afex_plot(mod_afex,"Active_substance")
 summary(as.glht(pairs(emmAS)),test=adjusted("BH"))
 emmDos<-emmeans(mod_afex,~Dose)
 pairs(emmDos)
+afex_plot(mod_afex,"Dose")
 summary(as.glht(pairs(emmDos)),test=adjusted("BH"))
 emmClone<-emmeans(mod_afex,~Clone)
 pairs(emmClone)
+afex_plot(mod_afex,"Clone")
 summary(as.glht(pairs(emmClone)),test=adjusted("BH"))
 
 #investigating the effect of Dose by active substance
@@ -110,6 +113,25 @@ mmod_nblarv.2ter<-glmmTMB(Total~Active_substance+Dose+Clone+
 summary(mmod_nblarv.2ter)
 overdisp_fun(mmod_nblarv.2ter)
 Anova(mmod_nblarv.2ter)
+vif(mmod_nblarv.2ter) #doesn't work
+
+emmAS<-emmeans(mmod_nblarv.2ter,~Active_substance)
+pairs(emmAS)
+afex_plot(mmod_nblarv.2ter,"Active_substance")
+summary(as.glht(pairs(emmAS)),test=adjusted("BH"))
+emmDos<-emmeans(mmod_nblarv.2ter,~Dose)
+pairs(emmDos)
+afex_plot(mmod_nblarv.2ter,"Dose")
+summary(as.glht(pairs(emmDos)),test=adjusted("BH"))
+emmClone<-emmeans(mmod_nblarv.2ter,~Clone)
+pairs(emmClone)
+afex_plot(mmod_nblarv.2ter,"Clone")
+summary(as.glht(pairs(emmClone)),test=adjusted("BH"))
+
+#investigating the effect of Dose by active substance
+emmDoByAS<-emmeans(mmod_nblarv.2ter,"Dose",by="Active_substance")
+emmDoByAS
+pairs(emmDoByAS)
 
 #figures for the effect of AS on the mean number of larvae
 interaction.plot(temp$Dose,temp$Active_substance,temp$Total,las=1)
