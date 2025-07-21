@@ -16,10 +16,10 @@ source("CrossKingdom_load.R")
 temp<-MyzHerbi[MyzHerbi$Dose!="N/2",]
 temp<-drop.levels(temp,reorder=FALSE)
 mod_nblarv<-aov(Total~Active_substance*Dose*Clone
-                +Error(Repetition/Dose/Clone),data=temp)
+                +Error(Repetition),data=temp)
 summary(mod_nblarv)
 mod_nblarv<-aov(Total~(Active_substance+Dose+Clone)^2
-                +Error(Repetition/Dose/Clone),data=temp)
+                +Error(Repetition),data=temp)
 summary(mod_nblarv)
 TukeyHSD(mod_nblarv) #doesn't work with an Error term in the aov
 
@@ -40,6 +40,9 @@ mod_afex<-aov_car(Total~(Active_substance+Dose+Clone+
                   data=temp)
 mod_afex
 afex_plot(mod_afex,"Dose","Active_substance","Clone")
+afex_plot(mod_afex,"Dose",panel=~Clone+Active_substance) #no strong Clone effect
+afex_plot(mod_afex,"Dose",panel=~Active_substance)
+
 
 emmAS<-emmeans(mod_afex,~Active_substance)
 pairs(emmAS)
