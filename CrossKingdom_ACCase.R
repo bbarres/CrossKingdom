@@ -32,9 +32,11 @@ plot(emm)
 #lsmeans package
 
 #using the afex package
+#first we need an ID for the different individual
+temp$ID<-paste(temp$Clone,temp$Active_substance,temp$Dose,sep="_")
 mod_afex<-aov_car(Total~(Active_substance+Dose+Clone+
                            Active_substance:Dose+Dose:Clone+
-                           Error(Repetition/(Active_substance+Dose+Clone))),
+                           Error(ID/Repetition)),
                   data=temp)
 mod_afex
 afex_plot(mod_afex,"Dose","Active_substance","Clone")
@@ -64,7 +66,7 @@ pairs(emmDoByAS)
 
 #same kind of analysis but in a glmm framework
 mmod_nblarv<-lme(Total~Active_substance*Dose*Clone,
-                 random= ~1|Repetition/Dose/Clone,
+                 random= ~1|Repetition,
                  data=temp,method="ML")
 summary(mmod_nblarv)
 mmod_nblarv.1<-update(mmod_nblarv,~. -Active_substance:Dose:Clone)
@@ -87,20 +89,31 @@ plot(mmod_nblarv.2,Total~fitted(.))
 #normal distribution of errors in the different repetition
 qqnorm(mmod_nblarv.2,~resid(.)|Repetition)
 Anova(mmod_nblarv.2,type=c("III"))
-#checking for overdispersion
-overdisp_fun = function(model) {
-  sum(residuals(model,type="pearson")^2)/df.residual(model)
+
+#checking for overdispersion from 
+#https://bbolker.github.io/mixedmodels-misc/glmmFAQ.html#overdispersion
+#seems to be conservative
+overdisp_fun<-function(model) {
+  rdf<-df.residual(model)
+  rp<-residuals(model,type="pearson")
+  Pearson.chisq<-sum(rp^2)
+  prat<-Pearson.chisq/rdf
+  pval<-pchisq(Pearson.chisq,df=rdf,lower.tail=FALSE)
+  c(chisq=Pearson.chisq,ratio=prat,rdf=rdf,p=pval)
 }
 
-overdisp_fun(mmod_nblarv.2) #doesn't seem to work (df.residual=NULL)
+overdisp_fun(mmod_nblarv.2) #doesn't seem to work with nlme
 
+mmod_nblarv.2bis<-lmer(Total~(Active_substance+Dose+Clone)^2+(1|Repetition),
+                    data=temp,REML=FALSE)
+overdisp_fun(mmod_nblarv.2bis) #there are overdispersion
 
 #same model but using lmer
 r<-temp$Repetition
 rd<-temp$Repetition:temp$Dose
 rdc<-temp$Repetition:temp$Dose:temp$Clone
 mmod_nblarv.2bis<-lmer(Total~Active_substance+Dose+Clone+
-                         Active_substance:Dose+Dose:Clone+(1|r)+(1|rd),
+                         Active_substance:Dose+Dose:Clone+(1|r),
                        data=temp,REML=FALSE)
 print(mmod_nblarv.2bis,cor=FALSE)
 
@@ -108,28 +121,42 @@ print(mmod_nblarv.2bis,cor=FALSE)
 #working
 mmod_nblarv.2ter<-glmmTMB(Total~Active_substance+Dose+Clone+
                             Active_substance:Dose+Dose:Clone+
-                            (1|r)+(1|rd)+(1|rdc),
+                            (1|r),
                           data=temp,REML=FALSE)
 summary(mmod_nblarv.2ter)
 overdisp_fun(mmod_nblarv.2ter)
 Anova(mmod_nblarv.2ter)
 vif(mmod_nblarv.2ter) #doesn't work
 
-emmAS<-emmeans(mmod_nblarv.2ter,~Active_substance)
+mmod_nblarv.2qat<-glmmTMB(Total~Active_substance+Dose+Clone+
+                            Active_substance:Dose+Dose:Clone+
+                            (1|r),
+                          data=temp,REML=FALSE,family=poisson)
+summary(mmod_nblarv.2qat)
+overdisp_fun(mmod_nblarv.2qat) #still overdispersion
+
+mmod_nblarv.2qat<-glmmTMB(Total~Active_substance+Dose+Clone+
+                            Active_substance:Dose+Dose:Clone+
+                            (1|r),
+                          data=temp,REML=FALSE,family=nbinom1)
+summary(mmod_nblarv.2qat)
+overdisp_fun(mmod_nblarv.2qat) 
+
+emmAS<-emmeans(mmod_nblarv.2qat,~Active_substance)
 pairs(emmAS)
-afex_plot(mmod_nblarv.2ter,"Active_substance")
+afex_plot(mmod_nblarv.2qat,"Active_substance")
 summary(as.glht(pairs(emmAS)),test=adjusted("BH"))
-emmDos<-emmeans(mmod_nblarv.2ter,~Dose)
+emmDos<-emmeans(mmod_nblarv.2qat,~Dose)
 pairs(emmDos)
-afex_plot(mmod_nblarv.2ter,"Dose")
+afex_plot(mmod_nblarv.2qat,"Dose")
 summary(as.glht(pairs(emmDos)),test=adjusted("BH"))
-emmClone<-emmeans(mmod_nblarv.2ter,~Clone)
+emmClone<-emmeans(mmod_nblarv.2qat,~Clone)
 pairs(emmClone)
-afex_plot(mmod_nblarv.2ter,"Clone")
+afex_plot(mmod_nblarv.2qat,"Clone")
 summary(as.glht(pairs(emmClone)),test=adjusted("BH"))
 
 #investigating the effect of Dose by active substance
-emmDoByAS<-emmeans(mmod_nblarv.2ter,"Dose",by="Active_substance")
+emmDoByAS<-emmeans(mmod_nblarv.2qat,"Dose",by="Active_substance")
 emmDoByAS
 pairs(emmDoByAS)
 
