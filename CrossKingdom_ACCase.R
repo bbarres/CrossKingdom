@@ -109,7 +109,7 @@ overdisp_fun(mmod_nblarv.2) #doesn't seem to work with nlme
 
 mmod_nblarv.2bis<-lmer(Total~(Active_substance+Dose+Clone)^2+(1|Repetition),
                     data=temp,REML=FALSE)
-overdisp_fun(mmod_nblarv.2bis) #there are overdispersion
+overdisp_fun(mmod_nblarv.2bis) #there is overdispersion
 
 #same model but using lmer
 r<-temp$Repetition
@@ -131,6 +131,7 @@ overdisp_fun(mmod_nblarv.2ter)
 Anova(mmod_nblarv.2ter)
 vif(mmod_nblarv.2ter) #doesn't work
 
+#glmm with poisson distribution -> glmmTMB
 mmod_nblarv.2qat<-glmmTMB(Total~Active_substance+Dose+Clone+
                             Active_substance:Dose+Dose:Clone+
                             (1|r),
@@ -138,12 +139,17 @@ mmod_nblarv.2qat<-glmmTMB(Total~Active_substance+Dose+Clone+
 summary(mmod_nblarv.2qat)
 overdisp_fun(mmod_nblarv.2qat) #still overdispersion
 
-mmod_nblarv.2qat<-glmmTMB(Total~Active_substance+Dose+Clone+
-                            Active_substance:Dose+Dose:Clone+
-                            (1|r),
-                          data=temp,REML=FALSE,family=nbinom1)
+mmod_nblarv.2qat<-glmmTMB(Total~(Active_substance+Dose+Clone)^2+(1|r),
+                          data=temp,REML=FALSE,
+                          family=nbinom1) #similar to a quasipoisson
 summary(mmod_nblarv.2qat)
-overdisp_fun(mmod_nblarv.2qat) 
+overdisp_fun(mmod_nblarv.2qat) #less overdispersion
+Anova(mmod_nblarv.2qat)
+plot(mmod_nblarv.2qat) #doesn't work
+#response variable vs the fitted value
+plot(mmod_nblarv.2qat,Total~fitted(.)) #doesn't work
+#normal distribution of errors in the different repetition
+qqnorm(mmod_nblarv.2qat,~resid(.)|Repetition) #doesn't work
 
 emmAS<-emmeans(mmod_nblarv.2qat,~Active_substance)
 pairs(emmAS)
@@ -162,6 +168,10 @@ summary(as.glht(pairs(emmClone)),test=adjusted("BH"))
 emmDoByAS<-emmeans(mmod_nblarv.2qat,"Dose",by="Active_substance")
 emmDoByAS
 pairs(emmDoByAS)
+
+afex_plot(mmod_nblarv.2qat,"Dose","Active_substance","Clone")
+afex_plot(mmod_nblarv.2qat,"Dose",panel=~Clone+Active_substance) #no strong Clone effect
+afex_plot(mmod_nblarv.2qat,"Dose",panel=~Active_substance)
 
 #figures for the effect of AS on the mean number of larvae
 interaction.plot(temp$Dose,temp$Active_substance,temp$Total,las=1)
