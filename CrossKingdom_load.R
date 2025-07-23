@@ -10,6 +10,7 @@
 
 library(afex)
 library(car)
+library(DHARMa)
 library(drc)
 library(plotrix)
 library(gdata)

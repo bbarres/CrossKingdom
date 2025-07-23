@@ -18,29 +18,31 @@ temp<-drop.levels(temp,reorder=FALSE)
 mod_nblarv<-aov(Total~Active_substance*Dose*Clone
                 +Error(Repetition),data=temp)
 summary(mod_nblarv)
+#we can remove the three way interaction
 mod_nblarv<-aov(Total~(Active_substance+Dose+Clone)^2
                 +Error(Repetition),data=temp)
 summary(mod_nblarv)
-TukeyHSD(mod_nblarv) #doesn't work with an Error term in the aov
 
 emm<-emmeans(mod_nblarv,~(Active_substance+Dose+Clone)^2)
 plot(emm)
 emm<-emmeans(mod_nblarv,~(Clone+Dose+Active_substance)^2)
 plot(emm)
-#alternatively, you can use mixed model and glht function from the 
-#multcomp package other possibilité afex package function mixed + 
-#lsmeans package
 
 #using the afex package
 #first we need an ID for the different individual
 temp$ID<-paste(temp$Clone,temp$Active_substance,temp$Dose,sep="_")
+mod_afex<-aov_car(Total~((Active_substance+Dose+Clone)^2+
+                           Error(ID/Repetition)),
+                  data=temp)
+mod_afex
 mod_afex<-aov_car(Total~(Active_substance+Dose+Clone+
                            Active_substance:Dose+Dose:Clone+
                            Error(ID/Repetition)),
                   data=temp)
 mod_afex
 afex_plot(mod_afex,"Dose","Active_substance","Clone")
-afex_plot(mod_afex,"Dose",panel=~Clone+Active_substance) #no strong Clone effect
+afex_plot(mod_afex,"Dose",panel=~Clone+Active_substance)
+#no strong Clone effect
 afex_plot(mod_afex,"Dose",panel=~Active_substance)
 
 
@@ -107,34 +109,35 @@ overdisp_fun<-function(model) {
 
 overdisp_fun(mmod_nblarv.2) #doesn't seem to work with nlme
 
-mmod_nblarv.2bis<-lmer(Total~(Active_substance+Dose+Clone)^2+(1|Repetition),
-                    data=temp,REML=FALSE)
-overdisp_fun(mmod_nblarv.2bis) #there is overdispersion
 
 #same model but using lmer
-r<-temp$Repetition
-rd<-temp$Repetition:temp$Dose
-rdc<-temp$Repetition:temp$Dose:temp$Clone
-mmod_nblarv.2bis<-lmer(Total~Active_substance+Dose+Clone+
-                         Active_substance:Dose+Dose:Clone+(1|r),
+mmod_nblarv.2bis<-lmer(Total~(Active_substance+Dose+Clone)^2+(1|Repetition),
                        data=temp,REML=FALSE)
-print(mmod_nblarv.2bis,cor=FALSE)
+plot(mmod_nblarv.2bis)
+plot(mmod_nblarv.2bis,Total~fitted(.))
+Anova(mmod_nblarv.2bis,type="III")
+overdisp_fun(mmod_nblarv.2bis) #not very appropriate for glmm
+testDispersion(mmod_nblarv.2bis) #more adapted and no overdispersion!
+plotResiduals(mmod_nblarv.2bis)
+resid<-simulateResiduals(fittedModel=mmod_nblarv.2bis)
+plot(resid)
+AIC(mmod_nblarv.2bis)
+#checking for multicollinearity
+vif(mmod_nblarv.2bis) #should be <2.2 (sqrt(5)) or at least <3.2 (sqrt(10))
 
 #same analysis with package glmmTMB in order to have the overdisp function
 #working
-mmod_nblarv.2ter<-glmmTMB(Total~Active_substance+Dose+Clone+
-                            Active_substance:Dose+Dose:Clone+
-                            (1|r),
+mmod_nblarv.2ter<-glmmTMB(Total~(Active_substance+Dose+Clone)^2+
+                            (1|Repetition),
                           data=temp,REML=FALSE)
 summary(mmod_nblarv.2ter)
 overdisp_fun(mmod_nblarv.2ter)
 Anova(mmod_nblarv.2ter)
-vif(mmod_nblarv.2ter) #doesn't work
 
 #glmm with poisson distribution -> glmmTMB
 mmod_nblarv.2qat<-glmmTMB(Total~Active_substance+Dose+Clone+
                             Active_substance:Dose+Dose:Clone+
-                            (1|r),
+                            (1|Repetition),
                           data=temp,REML=FALSE,family=poisson)
 summary(mmod_nblarv.2qat)
 overdisp_fun(mmod_nblarv.2qat) #still overdispersion
@@ -144,7 +147,11 @@ mmod_nblarv.2qat<-glmmTMB(Total~(Active_substance+Dose+Clone)^2+(1|r),
                           family=nbinom1) #similar to a quasipoisson
 summary(mmod_nblarv.2qat)
 overdisp_fun(mmod_nblarv.2qat) #less overdispersion
-Anova(mmod_nblarv.2qat)
+Anova(mmod_nblarv.2qat,type="III")
+#we take a look at the residual
+resid<-simulateResiduals(fittedModel=mmod_nblarv.2qat)
+plot(resid)
+
 plot(mmod_nblarv.2qat) #doesn't work
 #response variable vs the fitted value
 plot(mmod_nblarv.2qat,Total~fitted(.)) #doesn't work
@@ -170,7 +177,8 @@ emmDoByAS
 pairs(emmDoByAS)
 
 afex_plot(mmod_nblarv.2qat,"Dose","Active_substance","Clone")
-afex_plot(mmod_nblarv.2qat,"Dose",panel=~Clone+Active_substance) #no strong Clone effect
+afex_plot(mmod_nblarv.2qat,"Dose",panel=~Clone+Active_substance)
+#no strong clone effect
 afex_plot(mmod_nblarv.2qat,"Dose",panel=~Active_substance)
 
 #figures for the effect of AS on the mean number of larvae
@@ -256,12 +264,18 @@ text(c((0:5)*3+(1:6)*2),y=5.8,
 aggregate(cbind(Live,Total_death,Total)~Clone+Active_substance+
             Dose,data=MyzHerbi,"sum")
 
-
 MortModl<-glm(cbind(Live,Total_death)~Active_substance*Dose*Clone,
               binomial,data=temp)
 summary(MortModl)
 anova(MortModl)
 
+r<-temp$Repetition
+ra<-temp$Repetition:temp$Active_substance
+rad<-temp$Repetition:temp$Active_substance:temp$Dose
+
+mmod_Death.2bis<-glmmTMB(cbind(Live,Total_death)~(Active_substance+Dose+Clone)^2+
+                        (1|r)+(1|ra)+(1|rad),
+                      data=temp,REML=FALSE,family=binomial)
 
 #figures for the effect of SA on the death rate of clones
 interaction.plot(temp$Dose,temp$Active_substance,
@@ -297,9 +311,6 @@ boxplot(Total_death~Clone+Dose+Active_substance,
 text(c((0:5)*6+(1:6)*2+1.5),y=65,
      labels=levels(temp$Active_substance),cex=1.5,
      col=c(3,3,3,4,4,4))
-
-
-
 
 
 ##############################################################################/
