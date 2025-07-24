@@ -79,21 +79,21 @@ summary(mmod_nblarv.1)
 anova(mmod_nblarv.1,mmod_nblarv)
 mmod_nblarv.2<-update(mmod_nblarv.1,~. -Active_substance:Clone)
 anova(mmod_nblarv.2,mmod_nblarv.1)
-#the interaction Active_substance:Clone can be removed
+#the interaction Active_substance:Clone could be removed
 mmod_nblarv.3<-update(mmod_nblarv.2,~. -Dose:Clone)
 anova(mmod_nblarv.3,mmod_nblarv.2)
 mmod_nblarv.4<-update(mmod_nblarv.2,~. -Active_substance:Dose)
 anova(mmod_nblarv.4,mmod_nblarv.2)
 
-#here is the "minimal" model
-summary(mmod_nblarv.2)
+#here is the model we keep
+summary(mmod_nblarv.1)
 #checking the residuals
-plot(mmod_nblarv.2)
+plot(mmod_nblarv.1)
 #response variable vs the fitted value
-plot(mmod_nblarv.2,Total~fitted(.))
+plot(mmod_nblarv.1,Total~fitted(.))
 #normal distribution of errors in the different repetition
-qqnorm(mmod_nblarv.2,~resid(.)|Repetition)
-Anova(mmod_nblarv.2,type=c("III"))
+qqnorm(mmod_nblarv.1,~resid(.)|Repetition)
+Anova(mmod_nblarv.1,type=c("III")) #type III anova
 
 #checking for overdispersion from 
 #https://bbolker.github.io/mixedmodels-misc/glmmFAQ.html#overdispersion
@@ -107,23 +107,20 @@ overdisp_fun<-function(model) {
   c(chisq=Pearson.chisq,ratio=prat,rdf=rdf,p=pval)
 }
 
-overdisp_fun(mmod_nblarv.2) #doesn't seem to work with nlme
-
-
 #same model but using lmer
-mmod_nblarv.2bis<-lmer(Total~(Active_substance+Dose+Clone)^2+(1|Repetition),
+mmod_nblarv.1bis<-lmer(Total~(Active_substance+Dose+Clone)^2+(1|Repetition),
                        data=temp,REML=FALSE)
-plot(mmod_nblarv.2bis)
-plot(mmod_nblarv.2bis,Total~fitted(.))
-Anova(mmod_nblarv.2bis,type="III")
-overdisp_fun(mmod_nblarv.2bis) #not very appropriate for glmm
-testDispersion(mmod_nblarv.2bis) #more adapted and no overdispersion!
-plotResiduals(mmod_nblarv.2bis)
-resid<-simulateResiduals(fittedModel=mmod_nblarv.2bis)
+plot(mmod_nblarv.1bis)
+plot(mmod_nblarv.1bis,Total~fitted(.))
+Anova(mmod_nblarv.1bis,type="III")
+overdisp_fun(mmod_nblarv.1bis) #not very appropriate for glmm
+testDispersion(mmod_nblarv.1bis) #more adapted and no overdispersion!
+plotResiduals(mmod_nblarv.1bis)
+resid<-simulateResiduals(fittedModel=mmod_nblarv.1bis)
 plot(resid)
-AIC(mmod_nblarv.2bis)
+AIC(mmod_nblarv.1bis)
 #checking for multicollinearity
-vif(mmod_nblarv.2bis) #should be <2.2 (sqrt(5)) or at least <3.2 (sqrt(10))
+vif(mmod_nblarv.1bis) #should be <2.2 (sqrt(5)) or at least <3.2 (sqrt(10))
 
 #same analysis with package glmmTMB in order to have the overdisp function
 #working
