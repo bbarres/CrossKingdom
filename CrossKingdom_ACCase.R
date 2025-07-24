@@ -94,18 +94,8 @@ plot(mmod_nblarv.1,Total~fitted(.))
 #normal distribution of errors in the different repetition
 qqnorm(mmod_nblarv.1,~resid(.)|Repetition)
 Anova(mmod_nblarv.1,type=c("III")) #type III anova
+AIC(mmod_nblarv.1)
 
-#checking for overdispersion from 
-#https://bbolker.github.io/mixedmodels-misc/glmmFAQ.html#overdispersion
-#seems to be conservative
-overdisp_fun<-function(model) {
-  rdf<-df.residual(model)
-  rp<-residuals(model,type="pearson")
-  Pearson.chisq<-sum(rp^2)
-  prat<-Pearson.chisq/rdf
-  pval<-pchisq(Pearson.chisq,df=rdf,lower.tail=FALSE)
-  c(chisq=Pearson.chisq,ratio=prat,rdf=rdf,p=pval)
-}
 
 #same model but using lmer
 mmod_nblarv.1bis<-lmer(Total~(Active_substance+Dose+Clone)^2+(1|Repetition),
@@ -113,8 +103,7 @@ mmod_nblarv.1bis<-lmer(Total~(Active_substance+Dose+Clone)^2+(1|Repetition),
 plot(mmod_nblarv.1bis)
 plot(mmod_nblarv.1bis,Total~fitted(.))
 Anova(mmod_nblarv.1bis,type="III")
-overdisp_fun(mmod_nblarv.1bis) #not very appropriate for glmm
-testDispersion(mmod_nblarv.1bis) #more adapted and no overdispersion!
+testDispersion(mmod_nblarv.1bis) #no overdispersion
 plotResiduals(mmod_nblarv.1bis)
 resid<-simulateResiduals(fittedModel=mmod_nblarv.1bis)
 plot(resid)
@@ -122,32 +111,27 @@ AIC(mmod_nblarv.1bis)
 #checking for multicollinearity
 vif(mmod_nblarv.1bis) #should be <2.2 (sqrt(5)) or at least <3.2 (sqrt(10))
 
-#same analysis with package glmmTMB in order to have the overdisp function
-#working
-mmod_nblarv.2ter<-glmmTMB(Total~(Active_substance+Dose+Clone)^2+
-                            (1|Repetition),
-                          data=temp,REML=FALSE)
-summary(mmod_nblarv.2ter)
-overdisp_fun(mmod_nblarv.2ter)
-Anova(mmod_nblarv.2ter)
-
-#glmm with poisson distribution -> glmmTMB
-mmod_nblarv.2qat<-glmmTMB(Total~Active_substance+Dose+Clone+
-                            Active_substance:Dose+Dose:Clone+
+#same analysis with package glmmTMB in order to use
+#generalized model: glmm with poisson distribution
+mmod_nblarv.1ter<-glmmTMB(Total~(Active_substance+Dose+Clone)^2+
                             (1|Repetition),
                           data=temp,REML=FALSE,family=poisson)
-summary(mmod_nblarv.2qat)
-overdisp_fun(mmod_nblarv.2qat) #still overdispersion
+summary(mmod_nblarv.1ter)
+Anova(mmod_nblarv.1ter,type="III")
+testDispersion(mmod_nblarv.1ter) #borderline overdispersion
+plotResiduals(mmod_nblarv.1ter)
+AIC(mmod_nblarv.1ter)
 
-mmod_nblarv.2qat<-glmmTMB(Total~(Active_substance+Dose+Clone)^2+(1|r),
+#same analysis with negative binomial
+mmod_nblarv.1qat<-glmmTMB(Total~(Active_substance+Dose+Clone)^2+
+                            (1|Repetition),
                           data=temp,REML=FALSE,
                           family=nbinom1) #similar to a quasipoisson
-summary(mmod_nblarv.2qat)
-overdisp_fun(mmod_nblarv.2qat) #less overdispersion
-Anova(mmod_nblarv.2qat,type="III")
-#we take a look at the residual
-resid<-simulateResiduals(fittedModel=mmod_nblarv.2qat)
-plot(resid)
+summary(mmod_nblarv.1qat)
+Anova(mmod_nblarv.1qat,type="III")
+testDispersion(mmod_nblarv.1qat) #no overdispersion
+plotResiduals(mmod_nblarv.1qat)
+AIC(mmod_nblarv.1qat)
 
 plot(mmod_nblarv.2qat) #doesn't work
 #response variable vs the fitted value
@@ -155,28 +139,28 @@ plot(mmod_nblarv.2qat,Total~fitted(.)) #doesn't work
 #normal distribution of errors in the different repetition
 qqnorm(mmod_nblarv.2qat,~resid(.)|Repetition) #doesn't work
 
-emmAS<-emmeans(mmod_nblarv.2qat,~Active_substance)
+emmAS<-emmeans(mmod_nblarv.1qat,~Active_substance)
 pairs(emmAS)
-afex_plot(mmod_nblarv.2qat,"Active_substance")
+afex_plot(mmod_nblarv.1qat,"Active_substance")
 summary(as.glht(pairs(emmAS)),test=adjusted("BH"))
-emmDos<-emmeans(mmod_nblarv.2qat,~Dose)
+emmDos<-emmeans(mmod_nblarv.1qat,~Dose)
 pairs(emmDos)
-afex_plot(mmod_nblarv.2qat,"Dose")
+afex_plot(mmod_nblarv.1qat,"Dose")
 summary(as.glht(pairs(emmDos)),test=adjusted("BH"))
-emmClone<-emmeans(mmod_nblarv.2qat,~Clone)
+emmClone<-emmeans(mmod_nblarv.1qat,~Clone)
 pairs(emmClone)
-afex_plot(mmod_nblarv.2qat,"Clone")
+afex_plot(mmod_nblarv.1qat,"Clone")
 summary(as.glht(pairs(emmClone)),test=adjusted("BH"))
 
 #investigating the effect of Dose by active substance
-emmDoByAS<-emmeans(mmod_nblarv.2qat,"Dose",by="Active_substance")
+emmDoByAS<-emmeans(mmod_nblarv.1qat,"Dose",by="Active_substance")
 emmDoByAS
 pairs(emmDoByAS)
 
-afex_plot(mmod_nblarv.2qat,"Dose","Active_substance","Clone")
-afex_plot(mmod_nblarv.2qat,"Dose",panel=~Clone+Active_substance)
+afex_plot(mmod_nblarv.1qat,"Dose","Active_substance","Clone")
+afex_plot(mmod_nblarv.1qat,"Dose",panel=~Clone+Active_substance)
 #no strong clone effect
-afex_plot(mmod_nblarv.2qat,"Dose",panel=~Active_substance)
+afex_plot(mmod_nblarv.1qat,"Dose",panel=~Active_substance)
 
 #figures for the effect of AS on the mean number of larvae
 interaction.plot(temp$Dose,temp$Active_substance,temp$Total,las=1)
