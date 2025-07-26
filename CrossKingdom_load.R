@@ -5,7 +5,7 @@
 ##############################################################################/
 
 ##############################################################################/
-#Loading the libraries####
+#Loading the libraries needed####
 ##############################################################################/
 
 library(afex)
@@ -22,6 +22,8 @@ library(multcomp)
 library(lme4)
 library(lsmeans)
 library(emmeans)
+library(skimr)
+library(summarytools)
 
 
 ##############################################################################/
@@ -52,12 +54,15 @@ dataRegDos153<-as.data.frame(aggregate(cbind(nb_vi,nb_mtot)~dose,
 MyzHerbi<-read.table("data/data_Myzus_herbicides_20250320.txt",
                      header=TRUE,stringsAsFactors=TRUE,sep="\t")
 #reorder factors
-MyzHerbi$Dose<-factor(MyzHerbi$Dose,levels=c("NT","N/2","N","2N"))
+MyzHerbi$Dose<-factor(MyzHerbi$Dose,levels=c("NT","N/2","N","2N"),
+                      ordered=TRUE)
 #reorder the Active substances
 MyzHerbi$Active_substance<-factor(MyzHerbi$Active_substance,
                                   levels=c("Clethodim","Cycloxydim",
                                            "Pinoxaden","Clodinafop",
                                            "Fluazifop","Quizalofop"))
+#convert the date to a date format
+MyzHerbi$Date<-dmy(MyzHerbi$Date)
 
 
 ##############################################################################/

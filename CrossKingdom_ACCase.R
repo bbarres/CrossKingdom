@@ -7,11 +7,30 @@
 #loading the data and packages
 source("CrossKingdom_load.R")
 
+#first we inspect the data
+str(MyzHerbi)
+head(MyzHerbi)
+tail(MyzHerbi)
+descr(MyzHerbi)
+skim(MyzHerbi)
+summary(MyzHerbi) #the design is not complete for the Dose N/2
+dfSummary(MyzHerbi) #the N/2 dose has not been 
+#we remove the N/2 to streamline the analyses
+MyzHerbiS<-MyzHerbi[MyzHerbi$Dose!="N/2",]
+MyzHerbiS<-drop.levels(MyzHerbiS,reorder=FALSE)
+str(MyzHerbiS)
+summary(MyzHerbiS)
+skim(MyzHerbiS)
+
 
 ##############################################################################/
-#Effect on fertility by lm####
+#Effect on total fertility by lm####
 ##############################################################################/
 
+#first we investigate the effect of the different factors on total
+#fertility
+hist(MyzHerbiS$Total)
+line(density(MyzHerbiS$Total))
 #analysis of the effect of SA on the mean number of larvae
 temp<-MyzHerbi[MyzHerbi$Dose!="N/2",]
 temp<-drop.levels(temp,reorder=FALSE)
