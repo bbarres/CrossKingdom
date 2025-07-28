@@ -39,10 +39,214 @@ mod_nblarv<-aov(Total~(Active_substance+Dose+Clone)^2
                 +Error(Repetition),data=MyzHerbiS)
 summary(mod_nblarv)
 
-emm<-emmeans(mod_nblarv,~(Active_substance+Dose+Clone)^2)
-plot(emm)
 emm<-emmeans(mod_nblarv,~(Clone+Dose+Active_substance)^2)
+plot(emm) #the magnitude of the differences between clones are small
+#all simple main effect comparisons
+pairs(emm,simple="each")
+pairs(emm,simple="each")[1] #very few comparison between clones significant
+emmip(mod_nblarv,~Dose|Active_substance*Clone)
+emmip(mod_nblarv,Active_substance~Dose|Clone)
+joint_tests(mod_nblarv,by="Clone")
+#same model but without the Clone variable
+mod_nblarv<-aov(Total~(Active_substance+Dose)^2
+                +Error(Repetition+Clone),data=MyzHerbiS)
+summary(mod_nblarv)
+emm<-emmeans(mod_nblarv,~(Dose+Active_substance)^2)
 plot(emm)
+#all simple main effect comparisons
+pairs(emm,simple="each")
+summary(as.glht(pairs(emm,simple="Dose")),test=adjusted("BH"))
+summary(as.glht(pairs(emm,simple="Active_substance")),test=adjusted("BH"))
+#no significant difference between active substance at dose NT
+#At dose N, only Quizalofop is significantly different from all other AS
+#At dose 2N, in to Quizalofop, differences also for Cycloxydim
+#Within AS, only Quizalofop and Cycloxydim display a signigicative 
+#difference between doses NT and N. There are also additional marginal 
+#differences for Clodinafop and Fluazifop between doses NT and 2N
+#In conclusion, it seems that at dose N, Quizalofop and Cycloxydim
+#affect the fertility whatever the clone 
+
+
+##############################################################################/
+#Effect on fertility using glmm####
+##############################################################################/
+
+#same model but using lmer
+mmod_nblarv.1<-lmer(Total~Active_substance*Dose*Clone+
+                         (1|Repetition),
+                       data=MyzHerbiS,REML=FALSE)
+mmod_nblarv.2<-lmer(Total~(Active_substance+Dose+Clone)^2+
+                         (1|Repetition),
+                       data=MyzHerbiS,REML=FALSE)
+anova(mmod_nblarv.2,mmod_nblarv.1) #three way interaction can be removed
+
+plot(mmod_nblarv.2)
+plot(mmod_nblarv.2,Total~fitted(.))
+Anova(mmod_nblarv.2,type="III") #no Clone main effect
+#checking for multicollinearity
+vif(mmod_nblarv.2) #should be <2.2 (sqrt(5)) or at least <3.2 (sqrt(10))
+#because no main effect and some multicollinearity, we remove the Clone 
+mmod_nblarv<-lmer(Total~(Active_substance+Dose)^2+
+                    (1|Repetition),
+                  data=MyzHerbiS,REML=FALSE)
+anova(mmod_nblarv,mmod_nblarv.2) #marginal improvement of loglik
+vif(mmod_nblarv) #should be <2.2 (sqrt(5)) or at least <3.2 (sqrt(10))
+#less colinearity
+testDispersion(mmod_nblarv) #no overdispersion
+plotResiduals(mmod_nblarv)
+resid<-simulateResiduals(fittedModel=mmod_nblarv)
+plot(resid)
+AIC(mmod_nblarv)
+plot(mmod_nblarv)
+plot(mmod_nblarv,Total~fitted(.))
+qqnorm(mmod_nblarv,~resid(.)|Repetition)
+Anova(mmod_nblarv,type="III") #no Dose main effect but strong interaction
+summary(mmod_nblarv)
+memm<-emmeans(mmod_nblarv,~(Dose+Active_substance)^2)
+plot(memm)
+#all simple main effect comparisons
+pairs(memm,simple="each")
+summary(as.glht(pairs(memm,simple="Dose")),test=adjusted("BH"))
+summary(as.glht(pairs(memm,simple="Active_substance")),test=adjusted("BH"))
+#no significant difference between active substance at dose NT
+#At dose N, only Quizalofop is significantly different from all other AS
+#At dose 2N, in to Quizalofop, differences also for Cycloxydim
+#Within AS, only Quizalofop and Cycloxydim display a signigicative 
+#difference between doses NT and N. There are also additional marginal 
+#differences for Clodinafop and Fluazifop between doses NT and 2N
+#In conclusion, it seems that at dose N, Quizalofop and Cycloxydim
+#affect the fertility whatever the clone -> should be removed for 
+#survival analyses
+
+
+
+#figures for the effect of AS on the mean number of larvae
+interaction.plot(MyzHerbiS$Dose,MyzHerbiS$Active_substance,
+                 MyzHerbiS$Total,las=1)
+boxplot(Total~Clone+Dose+Active_substance,data=MyzHerbiS,las=1,
+        at=c(((1+6*0):(6*1))+2*0,
+             ((1+6*1):(6*2))+2*1,
+             ((1+6*2):(6*3))+2*2,
+             ((1+6*3):(6*4))+2*3,
+             ((1+6*4):(6*5))+2*4,
+             ((1+6*5):(6*6))+2*5),
+        col=rep(c(1,2),times=18),
+        border=rep(c(3,4),each=18),
+        names=rep(c("NT","NT","N","N","2N","2N"),times=6))
+text(c((0:5)*6+(1:6)*2+1.5),y=99,
+     labels=levels(MyzHerbiS$Active_substance),cex=1.5,
+     col=c(3,3,3,4,4,4))
+#since there is no significant effect of the clone, they can be pooled 
+#together
+boxplot(Total~Dose+Active_substance,data=MyzHerbiS,las=1,
+        at=c(((1+3*0):(3*1))+2*0,
+             ((1+3*1):(3*2))+2*1,
+             ((1+3*2):(3*3))+2*2,
+             ((1+3*3):(3*4))+2*3,
+             ((1+3*4):(3*5))+2*4,
+             ((1+3*5):(3*6))+2*5),
+        border=rep(c(3,4),each=9),
+        names=rep(c("NT","N","2N"),times=6))
+text(c((0:5)*3+(1:6)*2),y=99,
+     labels=levels(MyzHerbiS$Active_substance),cex=1.5,
+     col=c(3,3,3,4,4,4))
+
+
+
+##############################################################################/
+#Effect of the herbicides AS on survival####
+##############################################################################/
+
+#removing unnecessary active substances and dose
+#because of the induces and unspecific mortality we remove 
+#Quizalofop and Cycloxydim
+#also in a first step and because we are primarily interested by the dose N
+#we remove the dose 2N to simplify the first modelling
+MyzHerbiM<-MyzHerbiS[MyzHerbiS$Dose!="2N",]
+MyzHerbiM<-MyzHerbiM[MyzHerbiM$Active_substance!="Quizalofop",]
+MyzHerbiM<-MyzHerbiM[MyzHerbiM$Active_substance!="Cycloxydim",]
+MyzHerbiM<-drop.levels(MyzHerbiM,reorder=FALSE)
+str(MyzHerbiM)
+summary(MyzHerbiM)
+skim(MyzHerbiM)
+
+
+MortModl<-glm(cbind(Live,Total_death)~Active_substance*Dose*Clone,
+              binomial,data=MyzHerbiM)
+summary(MortModl)
+anova(MortModl)
+
+r<-MyzHerbiM$Repetition
+ra<-MyzHerbiM$Repetition:MyzHerbiM$Active_substance
+rad<-MyzHerbiM$Repetition:MyzHerbiM$Active_substance:MyzHerbiM$Dose
+
+mmod_Death<-glmmTMB(cbind(Live,Total_death)~(Active_substance+Dose+Clone)^2+
+                        (1|Repetition),
+                      data=MyzHerbiM,REML=FALSE,family=binomial)
+
+
+Anova(mmod_Death,type="III") #no Clone main effect
+#checking for multicollinearity
+vif(mmod_Death) #should be <2.2 (sqrt(5)) or at least <3.2 (sqrt(10)) Doesn't work
+#because no main effect and some multicollinearity, we remove the Clone 
+testDispersion(mmod_Death) #some overdispersion
+plotResiduals(mmod_Death)
+resid<-simulateResiduals(fittedModel=mmod_Death)
+plot(resid) #not dramatic but some problems
+AIC(mmod_Death)
+plot(mmod_Death)
+plot(mmod_Death,Total~fitted(.))
+qqnorm(mmod_Death,~resid(.)|Repetition)
+Anova(mmod_Death,type="III") #no Dose main effect but strong interaction
+summary(mmod_Death)
+memm<-emmeans(mmod_Death,~(Clone+Dose+Active_substance)^2)
+plot(memm)
+#all simple main effect comparisons
+pairs(memm,simple="each")
+
+
+#figures for the effect of SA on the death rate of clones
+interaction.plot(MyzHerbiS$Dose,MyzHerbiS$Active_substance,
+                 MyzHerbiS$Total/MyzHerbiS$Laying_females,las=1)
+boxplot(Total_death/Total~Clone+Dose+Active_substance,
+        data=MyzHerbiS,las=1,
+        at=c(((1+6*0):(6*1))+2*0,
+             ((1+6*1):(6*2))+2*1,
+             ((1+6*2):(6*3))+2*2,
+             ((1+6*3):(6*4))+2*3,
+             ((1+6*4):(6*5))+2*4,
+             ((1+6*5):(6*6))+2*5),
+        col=rep(c(1,2),times=18),
+        border=rep(c(3,4),each=18),
+        names=rep(c("NT","NT","N","N","2N","2N"),times=6))
+text(c((0:5)*6+(1:6)*2+1.5),y=1.02,
+     labels=levels(MyzHerbiS$Active_substance),cex=1.5,
+     col=c(3,3,3,4,4,4))
+#figures for the effect of SA on the number of death for clone (in order
+#to remove the illusion of high death rate computed on a very low number 
+#of individuals)
+boxplot(Total_death~Clone+Dose+Active_substance,
+        data=MyzHerbiS,las=1,
+        at=c(((1+6*0):(6*1))+2*0,
+             ((1+6*1):(6*2))+2*1,
+             ((1+6*2):(6*3))+2*2,
+             ((1+6*3):(6*4))+2*3,
+             ((1+6*4):(6*5))+2*4,
+             ((1+6*5):(6*6))+2*5),
+        col=rep(c(1,2),times=18),
+        border=rep(c(3,4),each=18),
+        names=rep(c("NT","NT","N","N","2N","2N"),times=6))
+text(c((0:5)*6+(1:6)*2+1.5),y=65,
+     labels=levels(MyzHerbiS$Active_substance),cex=1.5,
+     col=c(3,3,3,4,4,4))
+
+
+##############################################################################/
+#END
+##############################################################################/
+
+
+
 
 #using the afex package
 #first we need an ID for the different individual
@@ -52,11 +256,7 @@ mod_afex<-aov_car(Total~((Active_substance+Dose+Clone)^2+
                            Error(ID/Repetition)),
                   data=MyzHerbiS)
 mod_afex
-mod_afex<-aov_car(Total~(Active_substance+Dose+Clone+
-                           Active_substance:Dose+Dose:Clone+
-                           Error(ID/Repetition)),
-                  data=MyzHerbiS)
-mod_afex
+
 afex_plot(mod_afex,"Dose","Active_substance","Clone")
 afex_plot(mod_afex,"Dose",panel=~Clone+Active_substance)
 #no strong Clone effect
@@ -82,9 +282,7 @@ emmDoByAS
 pairs(emmDoByAS)
 
 
-##############################################################################/
-#Effect on fertility using glmm####
-##############################################################################/
+
 
 #same kind of analysis but in a glmm framework
 mmod_nblarv<-lme(Total~Active_substance*Dose*Clone,
@@ -139,6 +337,7 @@ testDispersion(mmod_nblarv.1ter) #borderline overdispersion
 plotResiduals(mmod_nblarv.1ter)
 AIC(mmod_nblarv.1ter)
 
+
 #same analysis with negative binomial
 mmod_nblarv.1qat<-glmmTMB(Total~(Active_substance+Dose+Clone)^2+
                             (1|Repetition),
@@ -149,6 +348,8 @@ Anova(mmod_nblarv.1qat,type="III")
 testDispersion(mmod_nblarv.1qat) #no overdispersion
 plotResiduals(mmod_nblarv.1qat)
 AIC(mmod_nblarv.1qat)
+
+
 
 plot(mmod_nblarv.2qat) #doesn't work
 #response variable vs the fitted value
@@ -179,36 +380,14 @@ afex_plot(mmod_nblarv.1qat,"Dose",panel=~Clone+Active_substance)
 #no strong clone effect
 afex_plot(mmod_nblarv.1qat,"Dose",panel=~Active_substance)
 
-#figures for the effect of AS on the mean number of larvae
-interaction.plot(MyzHerbiS$Dose,MyzHerbiS$Active_substance,
-                 MyzHerbiS$Total,las=1)
-boxplot(Total~Clone+Dose+Active_substance,data=MyzHerbiS,las=1,
-        at=c(((1+6*0):(6*1))+2*0,
-             ((1+6*1):(6*2))+2*1,
-             ((1+6*2):(6*3))+2*2,
-             ((1+6*3):(6*4))+2*3,
-             ((1+6*4):(6*5))+2*4,
-             ((1+6*5):(6*6))+2*5),
-        col=rep(c(1,2),times=18),
-        border=rep(c(3,4),each=18),
-        names=rep(c("NT","NT","N","N","2N","2N"),times=6))
-text(c((0:5)*6+(1:6)*2+1.5),y=99,
-     labels=levels(MyzHerbiS$Active_substance),cex=1.5,
-     col=c(3,3,3,4,4,4))
-#since there is no significant effect of the clone, they can be pooled 
-#together
-boxplot(Total~Dose+Active_substance,data=MyzHerbiS,las=1,
-        at=c(((1+3*0):(3*1))+2*0,
-             ((1+3*1):(3*2))+2*1,
-             ((1+3*2):(3*3))+2*2,
-             ((1+3*3):(3*4))+2*3,
-             ((1+3*4):(3*5))+2*4,
-             ((1+3*5):(3*6))+2*5),
-        border=rep(c(3,4),each=9),
-        names=rep(c("NT","N","2N"),times=6))
-text(c((0:5)*3+(1:6)*2),y=99,
-     labels=levels(MyzHerbiS$Active_substance),cex=1.5,
-     col=c(3,3,3,4,4,4))
+
+
+
+
+
+##############################################################################/
+#Mean number of larvae as response variable
+##############################################################################/
 
 
 #analysis of the effect of SA on the mean number of larvae per mother
@@ -255,63 +434,3 @@ text(c((0:5)*3+(1:6)*2),y=5.8,
 
 
 
-##############################################################################/
-#Effect of the herbicides AS on survival####
-##############################################################################/
-
-#dose response analyses by replicate
-aggregate(cbind(Live,Total_death,Total)~Clone+Active_substance+
-            Dose,data=MyzHerbi,"sum")
-
-MortModl<-glm(cbind(Live,Total_death)~Active_substance*Dose*Clone,
-              binomial,data=MyzHerbiS)
-summary(MortModl)
-anova(MortModl)
-
-r<-MyzHerbiS$Repetition
-ra<-MyzHerbiS$Repetition:MyzHerbiS$Active_substance
-rad<-MyzHerbiS$Repetition:MyzHerbiS$Active_substance:MyzHerbiS$Dose
-
-mmod_Death.2bis<-glmmTMB(cbind(Live,Total_death)~(Active_substance+Dose+Clone)^2+
-                        (1|r)+(1|ra)+(1|rad),
-                      data=MyzHerbiS,REML=FALSE,family=binomial)
-
-#figures for the effect of SA on the death rate of clones
-interaction.plot(MyzHerbiS$Dose,MyzHerbiS$Active_substance,
-                 MyzHerbiS$Total/MyzHerbiS$Laying_females,las=1)
-boxplot(Total_death/Total~Clone+Dose+Active_substance,
-        data=MyzHerbiS,las=1,
-        at=c(((1+6*0):(6*1))+2*0,
-             ((1+6*1):(6*2))+2*1,
-             ((1+6*2):(6*3))+2*2,
-             ((1+6*3):(6*4))+2*3,
-             ((1+6*4):(6*5))+2*4,
-             ((1+6*5):(6*6))+2*5),
-        col=rep(c(1,2),times=18),
-        border=rep(c(3,4),each=18),
-        names=rep(c("NT","NT","N","N","2N","2N"),times=6))
-text(c((0:5)*6+(1:6)*2+1.5),y=1.02,
-     labels=levels(MyzHerbiS$Active_substance),cex=1.5,
-     col=c(3,3,3,4,4,4))
-#figures for the effect of SA on the number of death for clone (in order
-#to remove the illusion of high death rate computed on a very low number 
-#of individuals)
-boxplot(Total_death~Clone+Dose+Active_substance,
-        data=MyzHerbiS,las=1,
-        at=c(((1+6*0):(6*1))+2*0,
-             ((1+6*1):(6*2))+2*1,
-             ((1+6*2):(6*3))+2*2,
-             ((1+6*3):(6*4))+2*3,
-             ((1+6*4):(6*5))+2*4,
-             ((1+6*5):(6*6))+2*5),
-        col=rep(c(1,2),times=18),
-        border=rep(c(3,4),each=18),
-        names=rep(c("NT","NT","N","N","2N","2N"),times=6))
-text(c((0:5)*6+(1:6)*2+1.5),y=65,
-     labels=levels(MyzHerbiS$Active_substance),cex=1.5,
-     col=c(3,3,3,4,4,4))
-
-
-##############################################################################/
-#END
-##############################################################################/
