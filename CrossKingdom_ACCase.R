@@ -47,7 +47,8 @@ pairs(emm,simple="each")[1] #very few comparison between clones significant
 emmip(mod_nblarv,~Dose|Active_substance*Clone)
 emmip(mod_nblarv,Active_substance~Dose|Clone)
 joint_tests(mod_nblarv,by="Clone")
-#same model but without the Clone variable
+#same model but without the Clone variable as a main effect but as a 
+#random effect instead
 mod_nblarv<-aov(Total~(Active_substance+Dose)^2
                 +Error(Repetition+Clone),data=MyzHerbiS)
 summary(mod_nblarv)
@@ -59,12 +60,13 @@ summary(as.glht(pairs(emm,simple="Dose")),test=adjusted("BH"))
 summary(as.glht(pairs(emm,simple="Active_substance")),test=adjusted("BH"))
 #no significant difference between active substance at dose NT
 #At dose N, only Quizalofop is significantly different from all other AS
-#At dose 2N, in to Quizalofop, differences also for Cycloxydim
-#Within AS, only Quizalofop and Cycloxydim display a signigicative 
+#At dose 2N, in addition to Quizalofop, differences also for Cycloxydim
+#Within AS, only Quizalofop and Cycloxydim display a significant 
 #difference between doses NT and N. There are also additional marginal 
 #differences for Clodinafop and Fluazifop between doses NT and 2N
 #In conclusion, it seems that at dose N, Quizalofop and Cycloxydim
-#affect the fertility whatever the clone 
+#affect the fertility whatever the clone  -> these AS should be removed 
+#for survival analyses
 
 
 ##############################################################################/
@@ -99,7 +101,7 @@ plot(resid)
 AIC(mmod_nblarv)
 plot(mmod_nblarv)
 plot(mmod_nblarv,Total~fitted(.))
-qqnorm(mmod_nblarv,~resid(.)|Repetition)
+qqnorm(mmod_nblarv,~resid(.)|Repetition) #not working
 Anova(mmod_nblarv,type="III") #no Dose main effect but strong interaction
 summary(mmod_nblarv)
 memm<-emmeans(mmod_nblarv,~(Dose+Active_substance)^2)
@@ -110,13 +112,13 @@ summary(as.glht(pairs(memm,simple="Dose")),test=adjusted("BH"))
 summary(as.glht(pairs(memm,simple="Active_substance")),test=adjusted("BH"))
 #no significant difference between active substance at dose NT
 #At dose N, only Quizalofop is significantly different from all other AS
-#At dose 2N, in to Quizalofop, differences also for Cycloxydim
-#Within AS, only Quizalofop and Cycloxydim display a signigicative 
+#At dose 2N, in addition to Quizalofop, differences also for Cycloxydim
+#Within AS, only Quizalofop and Cycloxydim display a significant 
 #difference between doses NT and N. There are also additional marginal 
 #differences for Clodinafop and Fluazifop between doses NT and 2N
 #In conclusion, it seems that at dose N, Quizalofop and Cycloxydim
-#affect the fertility whatever the clone -> should be removed for 
-#survival analyses
+#affect the fertility whatever the clone  -> these AS should be removed 
+#for survival analyses
 
 
 

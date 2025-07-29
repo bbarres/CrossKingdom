@@ -8,10 +8,10 @@
  collate  French_France.utf8
  ctype    French_France.utf8
  tz       Europe/Paris
- date     2025-07-27
+ date     2025-07-29
  rstudio  2025.05.0+496 Mariposa Orchid (desktop)
  pandoc   NA
- quarto   ERROR: Unknown command "TMPDIR=C:/Users/benoi/AppData/Local/Temp/Rtmpmeoshh/file2dbc64be1ce3". Did you mean command "uninstall"? @ C:\\PROGRA~1\\RStudio\\RESOUR~1\\app\\bin\\quarto\\bin\\quarto.exe
+ quarto   ERROR: Unknown command "TMPDIR=C:/Users/benoi/AppData/Local/Temp/RtmpAVdHGs/file940222e2ec9". Did you mean command "uninstall"? @ C:\\PROGRA~1\\RStudio\\RESOUR~1\\app\\bin\\quarto\\bin\\quarto.exe
 
 ─ Packages ────────────────────────────────────────────────────────────────────────
  ! package      * version    date (UTC) lib source
