@@ -184,13 +184,15 @@ rad<-MyzHerbiM$Repetition:MyzHerbiM$Active_substance:MyzHerbiM$Dose
 
 
 mmod_Death<-glmer(cbind(Total_death,Live)~(Active_substance+Dose+Clone)^2+
-                    (1|r)+(1|ra)+(1|rad),
+                    (1|r),
                   data=MyzHerbiM,family=binomial)
 
 mmod_Death<-glmmTMB(cbind(Total_death,Live)~(Active_substance+Dose+Clone)^2+
                         (1|Repetition),
                       data=MyzHerbiM,REML=FALSE,family=binomial)
-
+mmod_Death<-glmer(cbind(Total_death,Live)~Active_substance*Dose*Clone+
+                    (1|r),
+                  data=MyzHerbiM,family=binomial)
 
 Anova(mmod_Death,type="III") #no Clone main effect
 #checking for multicollinearity
