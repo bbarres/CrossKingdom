@@ -182,7 +182,12 @@ r<-MyzHerbiM$Repetition
 ra<-MyzHerbiM$Repetition:MyzHerbiM$Active_substance
 rad<-MyzHerbiM$Repetition:MyzHerbiM$Active_substance:MyzHerbiM$Dose
 
-mmod_Death<-glmmTMB(cbind(Live,Total_death)~(Active_substance+Dose+Clone)^2+
+
+mmod_Death<-glmer(cbind(Total_death,Live)~(Active_substance+Dose+Clone)^2+
+                    (1|r)+(1|ra)+(1|rad),
+                  data=MyzHerbiM,family=binomial)
+
+mmod_Death<-glmmTMB(cbind(Total_death,Live)~(Active_substance+Dose+Clone)^2+
                         (1|Repetition),
                       data=MyzHerbiM,REML=FALSE,family=binomial)
 
@@ -208,22 +213,20 @@ pairs(memm,simple="each")
 
 
 #figures for the effect of SA on the death rate of clones
-interaction.plot(MyzHerbiS$Dose,MyzHerbiS$Active_substance,
-                 MyzHerbiS$Total/MyzHerbiS$Laying_females,las=1)
+interaction.plot(MyzHerbiM$Dose,MyzHerbiM$Active_substance,
+                 MyzHerbiM$Total_death/MyzHerbiM$Total,las=1)
 boxplot(Total_death/Total~Clone+Dose+Active_substance,
-        data=MyzHerbiS,las=1,
-        at=c(((1+6*0):(6*1))+2*0,
-             ((1+6*1):(6*2))+2*1,
-             ((1+6*2):(6*3))+2*2,
-             ((1+6*3):(6*4))+2*3,
-             ((1+6*4):(6*5))+2*4,
-             ((1+6*5):(6*6))+2*5),
-        col=rep(c(1,2),times=18),
-        border=rep(c(3,4),each=18),
-        names=rep(c("NT","NT","N","N","2N","2N"),times=6))
-text(c((0:5)*6+(1:6)*2+1.5),y=1.02,
-     labels=levels(MyzHerbiS$Active_substance),cex=1.5,
-     col=c(3,3,3,4,4,4))
+        data=MyzHerbiM,las=1,
+        at=c(((1+4*0):(4*1))+2*0,
+             ((1+4*1):(4*2))+2*1,
+             ((1+4*2):(4*3))+2*2,
+             ((1+4*3):(4*4))+2*3),
+        col=rep(c(1,2),times=8),
+        border=rep(c(3,4),each=8),
+        names=rep(c("NT","NT","N","N"),times=4))
+text(c((0:3)*4+(1:4)*2+1),y=1.02,
+     labels=levels(MyzHerbiM$Active_substance),cex=1.5,
+     col=c(3,3,4,4))
 #figures for the effect of SA on the number of death for clone (in order
 #to remove the illusion of high death rate computed on a very low number 
 #of individuals)
