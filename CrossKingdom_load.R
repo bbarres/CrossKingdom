@@ -66,6 +66,16 @@ MyzHerbi$Active_substance<-factor(MyzHerbi$Active_substance,
 MyzHerbi$Date<-dmy(MyzHerbi$Date)
 
 
+#data insecticides on weeds
+WeedInsc<-read.table("data/data_Advent_insecticides_20250801.txt",
+                     header=TRUE,stringsAsFactors=TRUE,sep="\t")
+#reorder factors
+WeedInsc$Dose<-factor(WeedInsc$Dose,levels=c("NT","N/2","N","2N"),
+                      ordered=TRUE)
+#convert the date to a date format
+WeedInsc$Date<-dmy(WeedInsc$Date)
+
+
 ##############################################################################/
 #Writing session information for reproducibility####
 ##############################################################################/
