@@ -248,6 +248,51 @@ text(c((0:5)*6+(1:6)*2+1.5),y=65,
      col=c(3,3,3,4,4,4))
 
 
+
+##############################################################################/
+#Estimating DL50 of the two herbicides on Myzus####
+##############################################################################/
+
+#preparing the dataset
+MyzDosRep<-MyzHerbi[MyzHerbi$Active_substance=="Clethodim"|
+                      MyzHerbi$Active_substance=="Pinoxaden",]
+MyzDosRep$DoseQ<-MyzDosRep$Dose
+levels(MyzDosRep$DoseQ)<-c("0","0.5","1","2")
+MyzDosRep$DoseQ<-as.numeric(as.character(MyzDosRep$DoseQ))
+
+#dose response analyses by clone for clethodim
+MyzDosClet<-MyzDosRep[MyzDosRep$Active_substance=="Clethodim",]
+Clethodim.m1<-drm(Total_death/Total~DoseQ,
+               curveid=Clone,
+               weights=Total,
+               data=MyzDosClet,
+               fct=LN.3u(),type="binomial")
+plot(Clethodim.m1,ylim=c(0,1.1),xlim=c(0,3),
+     main="Clethodim",
+     ylab="mortality rate",col=TRUE,
+     legendPos=c(0.5,1.1))
+#estimating EC50
+ED50cle<-ED(Clethodim.m1,0.50,type="absolute")
+#FR for the resistant clone
+ED50cle[2]/ED50cle[1]
+
+#dose response analyses by clone for clethodim
+MyzDosPino<-MyzDosRep[MyzDosRep$Active_substance=="Pinoxaden",]
+Pinoxaden.m1<-drm(Total_death/Total~DoseQ,
+                  curveid=Clone,
+                  weights=Total,
+                  data=MyzDosPino,
+                  fct=LN.3u(),type="binomial")
+plot(Pinoxaden.m1,ylim=c(0,1.1),xlim=c(0,3),
+     main="Pinoxaden",
+     ylab="mortality rate",col=TRUE,
+     legendPos=c(0.5,1.1))
+#estimating EC50
+ED50pin<-ED(Pinoxaden.m1,0.50,type="absolute")
+#FR for the resistant clone
+ED50pin[2]/ED50pin[1]
+
+
 ##############################################################################/
 #END
 ##############################################################################/
