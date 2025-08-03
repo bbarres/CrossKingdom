@@ -288,7 +288,7 @@ Pinoxaden.m1<-drm(Total_death/Total~DoseQ,
 plot(Pinoxaden.m1,ylim=c(0,1.1),xlim=c(0,50),
      main="Pinoxaden",
      ylab="mortality rate",col=TRUE,
-     legendPos=c(0.5,1.1))
+     legendPos=c(0.9,1.1))
 #estimating EC50
 ED50pin<-ED(Pinoxaden.m1,0.50,type="absolute")
 #FR for the resistant clone
