@@ -101,7 +101,6 @@ plot(resid)
 AIC(mmod_nblarv)
 plot(mmod_nblarv)
 plot(mmod_nblarv,Total~fitted(.))
-qqnorm(mmod_nblarv,~resid(.)|Repetition) #not working
 Anova(mmod_nblarv,type="III") #no Dose main effect but strong interaction
 summary(mmod_nblarv)
 memm<-emmeans(mmod_nblarv,~(Dose+Active_substance)^2)
@@ -119,7 +118,6 @@ summary(as.glht(pairs(memm,simple="Active_substance")),test=adjusted("BH"))
 #In conclusion, it seems that at dose N, Quizalofop and Cycloxydim
 #affect the fertility whatever the clone  -> these AS should be removed 
 #for survival analyses
-
 
 
 #figures for the effect of AS on the mean number of larvae
@@ -154,14 +152,13 @@ text(c((0:5)*3+(1:6)*2),y=99,
      col=c(3,3,3,4,4,4))
 
 
-
 ##############################################################################/
 #Effect of the herbicides AS on survival####
 ##############################################################################/
 
 #removing unnecessary active substances and dose
-#because of the induces and unspecific mortality we remove 
-#Quizalofop and Cycloxydim
+#because of the host plant induced and unspecific mortality we 
+#remove Quizalofop and Cycloxydim
 #also in a first step and because we are primarily interested by the dose N
 #we remove the dose 2N to simplify the first modelling
 MyzHerbiM<-MyzHerbiS[MyzHerbiS$Dose!="2N",]
@@ -172,40 +169,30 @@ str(MyzHerbiM)
 summary(MyzHerbiM)
 skim(MyzHerbiM)
 
-
+#simple generalized linear model
 MortModl<-glm(cbind(Live,Total_death)~Active_substance*Dose*Clone,
               binomial,data=MyzHerbiM)
 summary(MortModl)
 anova(MortModl)
 
-r<-MyzHerbiM$Repetition
-ra<-MyzHerbiM$Repetition:MyzHerbiM$Active_substance
-rad<-MyzHerbiM$Repetition:MyzHerbiM$Active_substance:MyzHerbiM$Dose
-
-
-mmod_Death<-glmer(cbind(Total_death,Live)~(Active_substance+Dose+Clone)^2+
-                    (1|r),
-                  data=MyzHerbiM,family=binomial)
-
-mmod_Death<-glmmTMB(cbind(Total_death,Live)~(Active_substance+Dose+Clone)^2+
+#mixed generalized linear model
+mmod_Death<-glmmTMB(cbind(Total_death,Live)~Active_substance*Dose*Clone+
                         (1|Repetition),
                       data=MyzHerbiM,REML=FALSE,family=binomial)
+#same model with glmer
 mmod_Death<-glmer(cbind(Total_death,Live)~Active_substance*Dose*Clone+
                     (1|Repetition),
                   data=MyzHerbiM,family=binomial)
-
 Anova(mmod_Death,type="III") #no Clone main effect
 #checking for multicollinearity
 vif(mmod_Death) #should be <2.2 (sqrt(5)) or at least <3.2 (sqrt(10)) Doesn't work
-#because no main effect and some multicollinearity, we remove the Clone 
-testDispersion(mmod_Death) #some overdispersion
+testDispersion(mmod_Death) #no overdispersion
 plotResiduals(mmod_Death)
 resid<-simulateResiduals(fittedModel=mmod_Death)
-plot(resid) #not dramatic but some problems
+plot(resid) #no dramatic deviation of the residuals
 AIC(mmod_Death)
 plot(mmod_Death)
 plot(mmod_Death,Total~fitted(.))
-qqnorm(mmod_Death,~resid(.)|Repetition)
 Anova(mmod_Death,type="III") #no Dose main effect but strong interaction
 summary(mmod_Death)
 memm<-emmeans(mmod_Death,~(Clone+Dose+Active_substance)^2)
