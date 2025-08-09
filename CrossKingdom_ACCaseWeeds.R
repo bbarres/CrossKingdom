@@ -12,9 +12,9 @@ str(WeedInsc)
 head(WeedInsc)
 tail(WeedInsc)
 descr(WeedInsc)
-skim(WeedInsc)
-summary(WeedInsc) #the design is not complete for the Dose N/2
-dfSummary(WeedInsc) #the N/2 dose has not been 
+skim(WeedInsc) #the design is not complete for all species
+summary(WeedInsc) #there are only Resistant phenotype for 2 species
+dfSummary(WeedInsc) 
 
 #we reduced the different phenotype categories to 2 categories:
 #dead and alive individuals
@@ -23,6 +23,54 @@ WeedInsc$alive<-WeedInsc$R+WeedInsc$r.+WeedInsc$r
 str(WeedInsc)
 head(WeedInsc)
 skim(WeedInsc)
+
+
+##############################################################################/
+#Effect of the insecticides AS on survival of sensitive plants####
+##############################################################################/
+
+#we first investigate the effect at dose N only 
+WeedInscN<-WeedInsc[WeedInsc$Dose=="N"|
+                      WeedInsc$Dose=="NT",]
+WeedInscN<-drop.levels(WeedInscN,reorder=FALSE)
+str(WeedInscN)
+summary(WeedInscN)
+skim(WeedInscN)
+#and on sensitive populations only
+WeedInscNS<-WeedInscN[WeedInscN$Phenotype=="S",]
+WeedInscNS<-drop.levels(WeedInscNS,reorder=FALSE)
+str(WeedInscNS)
+summary(WeedInscNS)
+skim(WeedInscNS)
+
+#Mixed effect model with repetition as random effect
+WeedSen.mmod<-glmer(cbind(dead,alive)~Active_substance*Dose*Weed+
+                       (1|Repetition),
+                     data=WeedInscNS,family=binomial)
+Anova(WeedSen.mmod,type="III") #no three way interaction effect
+WeedSen.mmod<-glmer(cbind(dead,alive)~(Active_substance+Dose+Weed)^2+
+                       (1|Repetition),
+                     data=WeedInscNS,family=binomial)
+Anova(WeedSen.mmod,type="III") #removing Dose:Weed interaction
+WeedSen.mmod<-glmer(cbind(dead,alive)~Active_substance+Dose+Weed+
+                       Active_substance:Dose+Active_substance:Weed+
+                       (1|Repetition),
+                     data=WeedInscNS,family=binomial)
+Anova(WeedSen.mmod,type="III") #removing Active_substance:Weed interaction
+WeedSen.mmod<-glmer(cbind(dead,alive)~Active_substance+Dose+Weed+
+                      Active_substance:Dose+
+                      (1|Repetition),
+                     data=WeedInscNS,family=binomial)
+Anova(WeedSen.mmod,type="III") #removing Active_substance:Dose interaction
+WeedSen.mmod<-glmer(cbind(dead,alive)~Active_substance+Dose+Weed+
+                       (1|Repetition),
+                     data=WeedInscNS,family=binomial)
+Anova(WeedSen.mmod,type="III") #removing Phenotype:Weed interaction
+WeedSen.mmod<-glmer(cbind(dead,alive)~Active_substance+Dose+Phenotype+Weed+
+                       Active_substance:Dose+Active_substance:Phenotype+
+                       (1|Repetition),
+                     data=WeedInscNS,family=binomial)
+Anova(WeedSen.mmod,type="III") #final model
 
 
 ##############################################################################/
