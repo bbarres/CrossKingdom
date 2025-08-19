@@ -247,7 +247,7 @@ MyzDosRep$DoseQ<-MyzDosRep$Dose
 
 #dose response analyses by clone for clethodim
 MyzDosClet<-MyzDosRep[MyzDosRep$Active_substance=="Clethodim",]
-levels(MyzDosClet$DoseQ)<-c("0","1.50","3.00","6.00") #150-300-600g/ha
+levels(MyzDosClet$DoseQ)<-c("0","0.50","1","2") #g/L or 150-300-600g/ha
 MyzDosClet$DoseQ<-as.numeric(as.character(MyzDosClet$DoseQ))
 Clethodim.m1<-drm(Total_death/Total~DoseQ,
                curveid=Clone,
@@ -265,7 +265,7 @@ ED50cle[2]/ED50cle[1]
 
 #dose response analyses by clone for clethodim
 MyzDosPino<-MyzDosRep[MyzDosRep$Active_substance=="Pinoxaden",]
-levels(MyzDosPino$DoseQ)<-c("0","3.0","6.0","12.0") #30-60-120g/ha
+levels(MyzDosPino$DoseQ)<-c("0","0.1","0.2","0.4") #g/L or 30-60-120g/ha
 MyzDosPino$DoseQ<-as.numeric(as.character(MyzDosPino$DoseQ))
 Pinoxaden.m1<-drm(Total_death/Total~DoseQ,
                   curveid=Clone,

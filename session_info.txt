@@ -1,4 +1,4 @@
-─ Session info ────────────────────────────────────────────────────────
+─ Session info ──────────────────────────────────────────────────────────────────────────────
  setting  value
  version  R version 4.5.1 (2025-06-13 ucrt)
  os       Windows 10 x64 (build 19045)
@@ -8,12 +8,12 @@
  collate  French_France.utf8
  ctype    French_France.utf8
  tz       Europe/Paris
- date     2025-08-08
+ date     2025-08-19
  rstudio  2025.05.0+496 Mariposa Orchid (desktop)
  pandoc   NA
- quarto   ERROR: Unknown command "TMPDIR=C:/Users/benoi/AppData/Local/Temp/Rtmp2BHPU8/file3b9c22407cc5". Did you mean command "uninstall"? @ C:\\PROGRA~1\\RStudio\\RESOUR~1\\app\\bin\\quarto\\bin\\quarto.exe
+ quarto   ERROR: Unknown command "TMPDIR=C:/Users/benoi/AppData/Local/Temp/Rtmp6Lirqq/file3cc86ee653ef". Did you mean command "uninstall"? @ C:\\PROGRA~1\\RStudio\\RESOUR~1\\app\\bin\\quarto\\bin\\quarto.exe
 
-─ Packages ────────────────────────────────────────────────────────────
+─ Packages ──────────────────────────────────────────────────────────────────────────────────
  ! package      * version    date (UTC) lib source
    abind          1.4-8      2024-09-12 [1] CRAN (R 4.4.1)
    afex         * 1.4-1      2024-09-01 [1] CRAN (R 4.5.1)
@@ -108,4 +108,4 @@
  * ── Packages attached to the search path.
  D ── DLL MD5 mismatch, broken installation.
 
-───────────────────────────────────────────────────────────────────────
+─────────────────────────────────────────────────────────────────────────────────────────────
