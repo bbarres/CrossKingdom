@@ -128,7 +128,7 @@ str(WeedLol)
 summary(WeedLol)
 skim(WeedLol) #there is only susceptible phenotypes for this species
 boxplot(dead/Total~Dose+Active_substance,
-        data=WeedLol,las=1,ylim=c(0,1))
+        data=WeedLol,las=1,ylim=c(0,1)) #nothing happening
 #simple generalized linear model
 MortLol<-glm(cbind(alive,dead)~Active_substance*Dose,
              binomial,data=WeedLol)
@@ -138,30 +138,7 @@ MortLol<-glm(cbind(alive,dead)~Active_substance+Dose,
              binomial,data=WeedLol)
 summary(MortLol)
 anova(MortLol)
-#mixed generalized linear model
-mmod_Lol<-glmer(cbind(alive,dead)~Active_substance*Dose+
-                  (1|Repetition),
-                data=WeedLol,family=binomial)
-Anova(mmod_Lol,type="III") #no interaction effect
-mmod_Lol<-glmer(cbind(alive,dead)~Active_substance+Dose+
-                  (1|Repetition),
-                data=WeedLol,family=binomial)
-Anova(mmod_Lol,type="III") #no effect of both
-#checking for multicollinearity
-vif(mmod_Lol) #should be <2.2 (sqrt(5)) or at least <3.2 (sqrt(10)) 
-testDispersion(mmod_Lol) #no overdispersion
-plotResiduals(mmod_Lol)
-resid<-simulateResiduals(fittedModel=mmod_Lol)
-plot(resid) #no dramatic deviation of the residuals
-AIC(mmod_Lol)
-plot(mmod_Lol)
-plot(mmod_Lol,Total~fitted(.))
-Anova(mmod_Lol,type="III") #no Dose main effect but strong interaction
-summary(mmod_Lol)
-memm<-emmeans(mmod_Lol,~Dose+Active_substance)
-plot(memm)
-#all simple main effect comparisons
-pairs(memm,simple="each")
+
 
 #Setaria####
 WeedSet<-WeedInscN[WeedInscN$Weed=="Setaria",]
@@ -288,41 +265,68 @@ pairs(memm,simple="each")
 SetDosRep<-WeedInsc[WeedInsc$Weed=="Setaria",]
 SetDosRep$DoseQ<-SetDosRep$Dose
 
-#dose response analyses by clone for spiromesifen
+#dose response analyses by population for spiromesifen
 SetDosSpiM<-SetDosRep[SetDosRep$Active_substance=="Spiromesifen",]
 levels(SetDosSpiM$DoseQ)<-c("0","0.50","1","2") #g/L or 150-300-600g/ha
 SetDosSpiM$DoseQ<-as.numeric(as.character(SetDosSpiM$DoseQ))
-Spiromesifen.m1<-drm(dead/Total~DoseQ,
+SpiromesifenS.m1<-drm(dead/Total~DoseQ,
                   curveid=Phenotype,
                   weights=Total,
                   data=SetDosSpiM,
                   fct=LN.3u(),type="binomial")
-plot(Spiromesifen.m1,ylim=c(0,1.1),xlim=c(0,10),
-     main="Spiromesifen",
+plot(SpiromesifenS.m1,ylim=c(0,1.1),xlim=c(0,10),
+     main="Setaria - Spiromesifen",
      ylab="mortality rate",col=TRUE,
      legendPos=c(0.5,1.1))
 #estimating EC50
-ED50Spim<-ED(Spiromesifen.m1,0.50,type="absolute")
-#FR for the resistant clone
-ED50Spim[2]/ED50Spim[1]
+ED50SpimS<-ED(SpiromesifenS.m1,0.50,type="absolute")
+#FR for the "resistant" population
+ED50SpimS[2]/ED50SpimS[1]
 
-#dose response analyses by clone for spirotetramat
+#dose response analyses by population for spirotetramat
 SetDosSpiT<-SetDosRep[SetDosRep$Active_substance=="Spirotetramat",]
 levels(SetDosSpiT$DoseQ)<-c("0","0.50","1","2") #g/L or 150-300-600g/ha
 SetDosSpiT$DoseQ<-as.numeric(as.character(SetDosSpiT$DoseQ))
-Spirotetramat.m1<-drm(dead/Total~DoseQ,
+SpirotetramatS.m1<-drm(dead/Total~DoseQ,
                      curveid=Phenotype,
                      weights=Total,
                      data=SetDosSpiT,
                      fct=LN.3u(),type="binomial")
-plot(Spirotetramat.m1,ylim=c(0,1.1),xlim=c(0,5),
-     main="Spirotetramat",
+plot(SpirotetramatS.m1,ylim=c(0,1.1),xlim=c(0,5),
+     main="Setaria - Spirotetramat",
      ylab="mortality rate",col=TRUE,
      legendPos=c(0.5,1.1))
 #estimating EC50
-ED50Spit<-ED(Spirotetramat.m1,0.50,type="absolute")
-#FR for the resistant clone
-ED50Spit[2]/ED50Spit[1]
+ED50SpitS<-ED(SpirotetramatS.m1,0.50,type="absolute")
+#FR for the "resistant" population
+ED50SpitS[2]/ED50SpitS[1]
+
+
+##############################################################################/
+#Estimating DL50 of the two insecticide on Zea####
+##############################################################################/
+
+#preparing the dataset
+ZeaDosRep<-WeedInsc[WeedInsc$Weed=="Zea",]
+ZeaDosRep$DoseQ<-ZeaDosRep$Dose
+
+#dose response analyses by population for spirotetramat
+ZeaDosSpiT<-ZeaDosRep[ZeaDosRep$Active_substance=="Spirotetramat",]
+levels(ZeaDosSpiT$DoseQ)<-c("0","0.50","1","2") #g/L or 150-300-600g/ha
+ZeaDosSpiT$DoseQ<-as.numeric(as.character(ZeaDosSpiT$DoseQ))
+SpirotetramatZ.m1<-drm(dead/Total~DoseQ,
+                      curveid=Phenotype,
+                      weights=Total,
+                      data=ZeaDosSpiT,
+                      fct=LN.3u(),type="binomial")
+plot(SpirotetramatZ.m1,ylim=c(0,1.1),xlim=c(0,5),
+     main="Zea - Spirotetramat",
+     ylab="mortality rate",col=TRUE,
+     legendPos=c(0.5,1.1))
+#estimating EC50
+ED50SpitZ<-ED(SpirotetramatZ.m1,0.50,type="absolute")
+#FR for the "resistant" population
+ED50SpitZ[2]/ED50SpitZ[1]
 
 
 ##############################################################################/
