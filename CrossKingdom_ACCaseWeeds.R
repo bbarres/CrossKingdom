@@ -24,10 +24,320 @@ str(WeedInsc)
 head(WeedInsc)
 skim(WeedInsc)
 
+#we first investigate the effect at dose N only 
+WeedInscN<-WeedInsc[WeedInsc$Dose=="N"|
+                      WeedInsc$Dose=="NT",]
+WeedInscN<-drop.levels(WeedInscN,reorder=FALSE)
+str(WeedInscN)
+summary(WeedInscN)
+skim(WeedInscN)
+
 
 ##############################################################################/
-#Effect of the insecticides AS on survival of sensitive plants####
+#Effect of the insecticides AS on survival by plant species####
 ##############################################################################/
+
+#Alopecurus####
+WeedAlo<-WeedInscN[WeedInscN$Weed=="Alopecurus",]
+WeedAlo<-drop.levels(WeedAlo,reorder=FALSE)
+str(WeedAlo)
+summary(WeedAlo)
+skim(WeedAlo) #there is only susceptible phenotypes for this species
+boxplot(dead/Total~Dose+Active_substance,
+        data=WeedAlo,las=1,ylim=c(0,1))
+#simple generalized linear model
+MortAlo<-glm(cbind(alive,dead)~Active_substance*Dose,
+              binomial,data=WeedAlo)
+summary(MortAlo)
+anova(MortAlo) #no interaction effect
+MortAlo<-glm(cbind(alive,dead)~Active_substance+Dose,
+             binomial,data=WeedAlo)
+summary(MortAlo)
+anova(MortAlo)
+#mixed generalized linear model
+mmod_Alo<-glmer(cbind(alive,dead)~Active_substance*Dose+
+                  (1|Repetition),
+                  data=WeedAlo,family=binomial)
+Anova(mmod_Alo,type="III") #no interaction effect
+mmod_Alo<-glmer(cbind(alive,dead)~Active_substance+Dose+
+                  (1|Repetition),
+                data=WeedAlo,family=binomial)
+Anova(mmod_Alo,type="III") #no effect of both
+#checking for multicollinearity
+vif(mmod_Alo) #should be <2.2 (sqrt(5)) or at least <3.2 (sqrt(10)) 
+testDispersion(mmod_Alo) #no overdispersion
+plotResiduals(mmod_Alo)
+resid<-simulateResiduals(fittedModel=mmod_Alo)
+plot(resid) #no dramatic deviation of the residuals
+AIC(mmod_Alo)
+plot(mmod_Alo)
+plot(mmod_Alo,Total~fitted(.))
+Anova(mmod_Alo,type="III") #no Dose main effect but strong interaction
+summary(mmod_Alo)
+memm<-emmeans(mmod_Alo,~(Dose+Active_substance)^2)
+plot(memm)
+#all simple main effect comparisons
+pairs(memm,simple="each")
+
+#Digitaria####
+WeedDig<-WeedInscN[WeedInscN$Weed=="Digitaria",]
+WeedDig<-drop.levels(WeedDig,reorder=FALSE)
+str(WeedDig)
+summary(WeedDig)
+skim(WeedDig) #there is only susceptible phenotypes for this species
+boxplot(dead/Total~Dose+Active_substance,
+        data=WeedDig,las=1,ylim=c(0,1))
+#simple generalized linear model
+MortDig<-glm(cbind(alive,dead)~Active_substance*Dose,
+             binomial,data=WeedDig)
+summary(MortDig)
+anova(MortDig) #no interaction effect
+MortDig<-glm(cbind(alive,dead)~Active_substance+Dose,
+             binomial,data=WeedDig)
+summary(MortDig)
+anova(MortDig)
+#mixed generalized linear model
+mmod_Dig<-glmer(cbind(alive,dead)~Active_substance*Dose+
+                  (1|Repetition),
+                data=WeedDig,family=binomial)
+Anova(mmod_Dig,type="III") #no interaction effect
+mmod_Dig<-glmer(cbind(alive,dead)~Active_substance+Dose+
+                  (1|Repetition),
+                data=WeedDig,family=binomial)
+Anova(mmod_Dig,type="III") #no effect of both
+#checking for multicollinearity
+vif(mmod_Dig) #should be <2.2 (sqrt(5)) or at least <3.2 (sqrt(10)) 
+testDispersion(mmod_Dig) #no overdispersion
+plotResiduals(mmod_Dig)
+resid<-simulateResiduals(fittedModel=mmod_Dig)
+plot(resid) #no dramatic deviation of the residuals
+AIC(mmod_Dig)
+plot(mmod_Dig)
+plot(mmod_Dig,Total~fitted(.))
+Anova(mmod_Dig,type="III") #no Dose main effect but strong interaction
+summary(mmod_Dig)
+memm<-emmeans(mmod_Dig,~Dose+Active_substance)
+plot(memm)
+#all simple main effect comparisons
+pairs(memm,simple="each")
+
+#Lolium####
+WeedLol<-WeedInscN[WeedInscN$Weed=="Lolium",]
+WeedLol<-drop.levels(WeedLol,reorder=FALSE)
+str(WeedLol)
+summary(WeedLol)
+skim(WeedLol) #there is only susceptible phenotypes for this species
+boxplot(dead/Total~Dose+Active_substance,
+        data=WeedLol,las=1,ylim=c(0,1))
+#simple generalized linear model
+MortLol<-glm(cbind(alive,dead)~Active_substance*Dose,
+             binomial,data=WeedLol)
+summary(MortLol)
+anova(MortLol) #no interaction effect
+MortLol<-glm(cbind(alive,dead)~Active_substance+Dose,
+             binomial,data=WeedLol)
+summary(MortLol)
+anova(MortLol)
+#mixed generalized linear model
+mmod_Lol<-glmer(cbind(alive,dead)~Active_substance*Dose+
+                  (1|Repetition),
+                data=WeedLol,family=binomial)
+Anova(mmod_Lol,type="III") #no interaction effect
+mmod_Lol<-glmer(cbind(alive,dead)~Active_substance+Dose+
+                  (1|Repetition),
+                data=WeedLol,family=binomial)
+Anova(mmod_Lol,type="III") #no effect of both
+#checking for multicollinearity
+vif(mmod_Lol) #should be <2.2 (sqrt(5)) or at least <3.2 (sqrt(10)) 
+testDispersion(mmod_Lol) #no overdispersion
+plotResiduals(mmod_Lol)
+resid<-simulateResiduals(fittedModel=mmod_Lol)
+plot(resid) #no dramatic deviation of the residuals
+AIC(mmod_Lol)
+plot(mmod_Lol)
+plot(mmod_Lol,Total~fitted(.))
+Anova(mmod_Lol,type="III") #no Dose main effect but strong interaction
+summary(mmod_Lol)
+memm<-emmeans(mmod_Lol,~Dose+Active_substance)
+plot(memm)
+#all simple main effect comparisons
+pairs(memm,simple="each")
+
+#Setaria####
+WeedSet<-WeedInscN[WeedInscN$Weed=="Setaria",]
+WeedSet<-drop.levels(WeedSet,reorder=FALSE)
+str(WeedSet)
+summary(WeedSet)
+skim(WeedSet) #there is both susceptible and resistant phenotypes
+boxplot(dead/Total~Phenotype+Dose+Active_substance,
+        data=WeedSet,las=1,ylim=c(0,1))
+#simple generalized linear model
+MortSet<-glm(cbind(alive,dead)~Active_substance*Dose*Phenotype,
+             binomial,data=WeedSet)
+summary(MortSet)
+anova(MortSet) #no three way interaction effect
+MortSet<-glm(cbind(alive,dead)~(Active_substance+Dose+Phenotype)^2,
+             binomial,data=WeedSet)
+summary(MortSet)
+anova(MortSet)
+#mixed generalized linear model
+mmod_Set<-glmer(cbind(alive,dead)~Active_substance*Dose*Phenotype+
+                  (1|Repetition),
+                data=WeedSet,family=binomial)
+Anova(mmod_Set,type="III") #no three way interaction effect
+mmod_Set<-glmer(cbind(alive,dead)~(Active_substance+Dose+Phenotype)^2+
+                  (1|Repetition),
+                data=WeedSet,family=binomial)
+Anova(mmod_Set,type="III") #no effect of both
+mmod_Set<-glmer(cbind(alive,dead)~(Active_substance+Dose+Phenotype
+                                   +Active_substance:Dose+
+                                     Active_substance:Phenotype)+
+                  (1|Repetition),
+                data=WeedSet,family=binomial)
+Anova(mmod_Set,type="III") #no effect of both
+mmod_Set<-glmer(cbind(alive,dead)~(Active_substance+Dose+Phenotype
+                                   +Active_substance:Phenotype)+
+                  (1|Repetition),
+                data=WeedSet,family=binomial)
+Anova(mmod_Set,type="III") #no effect of both
+mmod_Set<-glmer(cbind(alive,dead)~(Active_substance+Dose+Phenotype)+
+                  (1|Repetition),
+                data=WeedSet,family=binomial)
+Anova(mmod_Set,type="III") #no effect of both
+#checking for multicollinearity
+vif(mmod_Set) #should be <2.2 (sqrt(5)) or at least <3.2 (sqrt(10)) 
+testDispersion(mmod_Set) #no overdispersion
+plotResiduals(mmod_Set)
+resid<-simulateResiduals(fittedModel=mmod_Set)
+plot(resid) #no dramatic deviation of the residuals
+AIC(mmod_Set)
+plot(mmod_Set)
+plot(mmod_Set,Total~fitted(.))
+Anova(mmod_Set,type="III") #no Dose main effect but strong interaction
+summary(mmod_Set)
+memm<-emmeans(mmod_Set,~Dose+Active_substance)
+plot(memm)
+#all simple main effect comparisons
+pairs(memm,simple="each")
+
+#Zea####
+WeedZea<-WeedInscN[WeedInscN$Weed=="Zea",]
+WeedZea<-drop.levels(WeedZea,reorder=FALSE)
+str(WeedZea)
+summary(WeedZea)
+skim(WeedZea) #there is both susceptible and resistant phenotypes
+boxplot(dead/Total~Phenotype+Dose+Active_substance,
+        data=WeedZea,las=1,ylim=c(0,1))
+#simple generalized linear model
+MortZea<-glm(cbind(alive,dead)~Active_substance*Dose*Phenotype,
+             binomial,data=WeedZea)
+summary(MortZea)
+anova(MortZea) #no three way interaction effect
+MortZea<-glm(cbind(alive,dead)~(Active_substance+Dose+Phenotype)^2,
+             binomial,data=WeedZea)
+summary(MortZea)
+anova(MortZea)
+#mixed generalized linear model
+mmod_Zea<-glmer(cbind(alive,dead)~Active_substance*Dose*Phenotype+
+                  (1|Repetition),
+                data=WeedZea,family=binomial)
+Anova(mmod_Zea,type="III") #no three way interaction effect
+mmod_Zea<-glmer(cbind(alive,dead)~(Active_substance+Dose+Phenotype)^2+
+                  (1|Repetition),
+                data=WeedZea,family=binomial)
+Anova(mmod_Zea,type="III") #no effect of both
+mmod_Zea<-glmer(cbind(alive,dead)~(Active_substance+Dose+Phenotype
+                                   +Active_substance:Dose+
+                                     Active_substance:Phenotype)+
+                  (1|Repetition),
+                data=WeedZea,family=binomial)
+Anova(mmod_Zea,type="III") #no effect of both
+mmod_Zea<-glmer(cbind(alive,dead)~(Active_substance+Dose+Phenotype
+                                   +Active_substance:Phenotype)+
+                  (1|Repetition),
+                data=WeedZea,family=binomial)
+Anova(mmod_Zea,type="III") #no effect of both
+mmod_Zea<-glmer(cbind(alive,dead)~(Active_substance+Dose+Phenotype)+
+                  (1|Repetition),
+                data=WeedZea,family=binomial)
+Anova(mmod_Zea,type="III") #no effect of both
+#checking for multicollinearity
+vif(mmod_Zea) #should be <2.2 (sqrt(5)) or at least <3.2 (sqrt(10)) 
+testDispersion(mmod_Zea) #no overdispersion
+plotResiduals(mmod_Zea)
+resid<-simulateResiduals(fittedModel=mmod_Zea)
+plot(resid) #no dramatic deviation of the residuals
+AIC(mmod_Zea)
+plot(mmod_Zea)
+plot(mmod_Zea,Total~fitted(.))
+Anova(mmod_Zea,type="III") #no Dose main effect but strong interaction
+summary(mmod_Zea)
+memm<-emmeans(mmod_Zea,~Dose+Active_substance)
+plot(memm)
+#all simple main effect comparisons
+pairs(memm,simple="each")
+
+
+
+
+##############################################################################/
+#Estimating DL50 of the two insecticide on Setaria####
+##############################################################################/
+
+#preparing the dataset
+SetDosRep<-WeedInsc[WeedInsc$Weed=="Setaria",]
+SetDosRep$DoseQ<-SetDosRep$Dose
+
+#dose response analyses by clone for spiromesifen
+SetDosSpiM<-SetDosRep[SetDosRep$Active_substance=="Spiromesifen",]
+levels(SetDosSpiM$DoseQ)<-c("0","0.50","1","2") #g/L or 150-300-600g/ha
+SetDosSpiM$DoseQ<-as.numeric(as.character(SetDosSpiM$DoseQ))
+Spiromesifen.m1<-drm(dead/Total~DoseQ,
+                  curveid=Phenotype,
+                  weights=Total,
+                  data=SetDosSpiM,
+                  fct=LN.3u(),type="binomial")
+plot(Spiromesifen.m1,ylim=c(0,1.1),xlim=c(0,10),
+     main="Spiromesifen",
+     ylab="mortality rate",col=TRUE,
+     legendPos=c(0.5,1.1))
+#estimating EC50
+ED50Spim<-ED(Spiromesifen.m1,0.50,type="absolute")
+#FR for the resistant clone
+ED50Spim[2]/ED50Spim[1]
+
+#dose response analyses by clone for spirotetramat
+SetDosSpiT<-SetDosRep[SetDosRep$Active_substance=="Spirotetramat",]
+levels(SetDosSpiT$DoseQ)<-c("0","0.50","1","2") #g/L or 150-300-600g/ha
+SetDosSpiT$DoseQ<-as.numeric(as.character(SetDosSpiT$DoseQ))
+Spirotetramat.m1<-drm(dead/Total~DoseQ,
+                     curveid=Phenotype,
+                     weights=Total,
+                     data=SetDosSpiT,
+                     fct=LN.3u(),type="binomial")
+plot(Spirotetramat.m1,ylim=c(0,1.1),xlim=c(0,5),
+     main="Spirotetramat",
+     ylab="mortality rate",col=TRUE,
+     legendPos=c(0.5,1.1))
+#estimating EC50
+ED50Spit<-ED(Spirotetramat.m1,0.50,type="absolute")
+#FR for the resistant clone
+ED50Spit[2]/ED50Spit[1]
+
+
+##############################################################################/
+#END
+##############################################################################/
+
+
+
+
+
+
+
+
+
+
 
 #we first investigate the effect at dose N only 
 WeedInscN<-WeedInsc[WeedInsc$Dose=="N"|
@@ -66,8 +376,8 @@ WeedSen.mmod<-glmer(cbind(dead,alive)~Active_substance+Dose+Weed+
                        (1|Repetition),
                      data=WeedInscNS,family=binomial)
 Anova(WeedSen.mmod,type="III") #removing Phenotype:Weed interaction
-WeedSen.mmod<-glmer(cbind(dead,alive)~Active_substance+Dose+Phenotype+Weed+
-                       Active_substance:Dose+Active_substance:Phenotype+
+WeedSen.mmod<-glmer(cbind(dead,alive)~Active_substance+Dose+Weed+
+                       Active_substance:Dose+
                        (1|Repetition),
                      data=WeedInscNS,family=binomial)
 Anova(WeedSen.mmod,type="III") #final model
@@ -123,7 +433,8 @@ WeedSurv.mmod<-glmer(cbind(dead,alive)~Active_substance*Dose*Phenotype*Weed+
                     (1|Repetition),
                   data=WeedInscN,family=binomial)
 Anova(WeedSurv.mmod,type="III") #no three way interaction effect
-WeedSurv.mmod<-glmer(cbind(dead,alive)~(Active_substance+Dose+Phenotype+Weed)^2+
+WeedSurv.mmod<-glmer(cbind(dead,alive)~(Active_substance+Dose+
+                                          Phenotype+Weed)^2+
                        (1|Repetition),
                      data=WeedInscN,family=binomial)
 Anova(WeedSurv.mmod,type="III") #removing Active_substance:Weed interaction
@@ -152,8 +463,9 @@ WeedSurv.mmod<-glmer(cbind(dead,alive)~Active_substance+Dose+Phenotype+Weed+
 Anova(WeedSurv.mmod,type="III") #final model
 
 #checking for multicollinearity
-vif(WeedSurv.mmod) #should be <2.2 (sqrt(5)) or at least <3.2 (sqrt(10)) Doesn't work
-#because no main effect and some multicollinearity, we remove the Clone 
+vif(WeedSurv.mmod) #should be <2.2 (sqrt(5)) or at least <3.2 (sqrt(10)) 
+                   #Doesn't work
+#because no main effect and some multicollinearity, we remove the Clone effect
 testDispersion(WeedSurv.mmod) #some overdispersion
 plotResiduals(WeedSurv.mmod)
 resid<-simulateResiduals(fittedModel=WeedSurv.mmod)
@@ -202,14 +514,4 @@ boxplot(Total_death~Clone+Dose+Active_substance,
 text(c((0:5)*6+(1:6)*2+1.5),y=65,
      labels=levels(MyzHerbiS$Active_substance),cex=1.5,
      col=c(3,3,3,4,4,4))
-
-
-
-##############################################################################/
-#END
-##############################################################################/
-
-
-
-
 

@@ -185,7 +185,8 @@ mmod_Death<-glmer(cbind(Total_death,Live)~Active_substance*Dose*Clone+
                   data=MyzHerbiM,family=binomial)
 Anova(mmod_Death,type="III") #no Clone main effect
 #checking for multicollinearity
-vif(mmod_Death) #should be <2.2 (sqrt(5)) or at least <3.2 (sqrt(10)) Doesn't work
+vif(mmod_Death) #should be <2.2 (sqrt(5)) or at least <3.2 (sqrt(10)) 
+                #Doesn't work
 testDispersion(mmod_Death) #no overdispersion
 plotResiduals(mmod_Death)
 resid<-simulateResiduals(fittedModel=mmod_Death)
@@ -233,7 +234,6 @@ boxplot(Total_death~Clone+Dose+Active_substance,
 text(c((0:5)*6+(1:6)*2+1.5),y=65,
      labels=levels(MyzHerbiS$Active_substance),cex=1.5,
      col=c(3,3,3,4,4,4))
-
 
 
 ##############################################################################/
