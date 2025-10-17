@@ -72,7 +72,7 @@ plot(resid) #no dramatic deviation of the residuals
 AIC(mmod_Alo)
 plot(mmod_Alo)
 plot(mmod_Alo,Total~fitted(.))
-Anova(mmod_Alo,type="III") #no Dose main effect but strong interaction
+Anova(mmod_Alo,type="III") #no Dose or Active_substance main effects
 summary(mmod_Alo)
 memm<-emmeans(mmod_Alo,~(Dose+Active_substance)^2)
 plot(memm)

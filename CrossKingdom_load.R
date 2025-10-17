@@ -75,6 +75,15 @@ WeedInsc$Dose<-factor(WeedInsc$Dose,levels=c("NT","N/2","N","2N"),
 #convert the date to a date format
 WeedInsc$Date<-dmy(WeedInsc$Date)
 
+#alternative insecticides on weeds data
+WeedInscCont<-read.table("data/data_Advent_insecticides_20251017-cont.txt",
+                         header=TRUE,stringsAsFactors=TRUE,sep="\t")
+#reorder factors
+WeedInscCont$Dose<-factor(WeedInscCont$Dose,levels=c("NT","N/2","N","2N"),
+                          ordered=TRUE)
+#convert the date to a date format
+WeedInscCont$Date<-dmy(WeedInscCont$Date)
+
 
 ##############################################################################/
 #Writing session information for reproducibility####
